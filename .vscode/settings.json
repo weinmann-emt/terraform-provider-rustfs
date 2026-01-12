@@ -1,0 +1,7 @@
+{
+  "go.useLanguageServer": true,
+  "go.formatTool": "goimports",
+  "go.lintOnSave": "package",
+  "editor.formatOnSave": true,
+  "go.testEnvFile": "${workspaceFolder}/.env",
+}
