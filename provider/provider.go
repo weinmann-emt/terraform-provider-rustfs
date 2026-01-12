@@ -26,11 +26,11 @@ type RustfsProvider struct {
 
 // RustfsProviderModel describes the provider data model.
 type RustfsProviderModel struct {
-	Server   types.String `tfsdk:"server"`
-	Username types.String `tfsdk:"user"`
-	Password types.String `tfsdk:"password"`
-	Insecure types.Bool   `tfsdk:"insecure"`
-	Ssl      types.Bool   `tfsdk:"ssl"`
+	Endpoint     types.String `tfsdk:"endpoint"`
+	AccessKey    types.String `tfsdk:"accessKey"`
+	AccessSecret types.String `tfsdk:"accessSecret"`
+	Ssl          types.Bool   `tfsdk:"ssl"`
+	Insecure     types.Bool   `tfsdk:"insecure"`
 }
 
 func (p *RustfsProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -41,14 +41,14 @@ func (p *RustfsProvider) Metadata(ctx context.Context, req provider.MetadataRequ
 func (p *RustfsProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
-			"server": schema.StringAttribute{
+			"endpoint": schema.StringAttribute{
 				Required:    true,
 				Description: "MinIO server endpoint in the format host:port",
 			},
-			"user": schema.StringAttribute{
+			"accessKey": schema.StringAttribute{
 				Required: true,
 			},
-			"password": schema.StringAttribute{
+			"accessSecret": schema.StringAttribute{
 				Required:  true,
 				Sensitive: true,
 			},

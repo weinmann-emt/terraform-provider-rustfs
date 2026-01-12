@@ -21,13 +21,13 @@ type RustfsAdminConfig struct {
 	AccessKey    string
 	AccessSecret string
 	Endpoint     string
-	SkipSsl      bool
-	Secure       bool
+	Ssl          bool
+	Insecure     bool
 }
 
 type RustfsAdmin struct {
 	httpClient   *http.Client
-	secure       bool
+	insecure     bool
 	endpointURL  string
 	accessKey    string
 	accessSecret string
@@ -42,7 +42,7 @@ type RequestData struct {
 }
 
 func New(config RustfsAdminConfig) (client RustfsAdmin, err error) {
-	endpoint, err := client.createEndpointUrl(config.Endpoint, config.Secure)
+	endpoint, err := client.createEndpointUrl(config.Endpoint, config.Ssl)
 	client.endpointURL = endpoint
 	client.httpClient = &http.Client{}
 	client.accessKey = config.AccessKey

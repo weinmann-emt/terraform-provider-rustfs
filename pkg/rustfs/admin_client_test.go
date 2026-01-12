@@ -17,7 +17,7 @@ func TestIsAdmin(t *testing.T) {
 		AccessSecret: secret,
 		Endpoint:     endpoint,
 
-		Secure: false,
+		Ssl: false,
 	}
 
 	dut, _ := rustfs.New(config)
