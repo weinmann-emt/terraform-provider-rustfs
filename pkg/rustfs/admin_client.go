@@ -1,6 +1,7 @@
 package rustfs
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -38,7 +39,8 @@ type RequestData struct {
 	QueryValues   url.Values
 	RelPath       string // URL path relative to admin API base endpoint
 	Content       []byte
-	Method        string
+	// contentReader io.Reader
+	Method string
 }
 
 func New(config RustfsAdminConfig) (client RustfsAdmin, err error) {
@@ -105,7 +107,7 @@ func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*
 		urlStr = urlStr + "?" + s3utils.QueryEncode(request.QueryValues)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, request.Method, urlStr, nil)
+	req, err := http.NewRequestWithContext(ctx, request.Method, urlStr, bytes.NewBuffer(request.Content))
 	if err != nil {
 		return nil, err
 	}
