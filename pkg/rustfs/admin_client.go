@@ -1,6 +1,7 @@
 package rustfs
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -105,7 +106,7 @@ func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*
 		urlStr = urlStr + "?" + s3utils.QueryEncode(request.QueryValues)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, request.Method, urlStr, nil)
+	req, err := http.NewRequestWithContext(ctx, request.Method, urlStr, bytes.NewReader(request.Content))
 	if err != nil {
 		return nil, err
 	}
@@ -116,6 +117,6 @@ func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*
 	req.Header.Set("X-Amz-Content-Sha256", hex.EncodeToString(sum[:]))
 
 	// sign using minio go (too stupid to get it done self)
-	req = signer.SignV4(*req, c.accessKey, c.accessSecret, "", "")
+	req = signer.SignV4(*req, c.accessKey, c.accessSecret, "", "us-east-01")
 	return req, nil
 }

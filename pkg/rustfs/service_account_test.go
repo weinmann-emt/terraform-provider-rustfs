@@ -1,31 +1,38 @@
 package rustfs_test
 
-// func getClient() rustfs.RustfsAdmin {
-// 	endpoint := os.Getenv("RUSTFS_SERVER")
-// 	key := os.Getenv("RUSTFS_USER")
-// 	secret := os.Getenv("RUSTFS_SECRET")
+import (
+	"os"
+	"testing"
 
-// 	config := rustfs.RustfsAdminConfig{
-// 		AccessKey:    key,
-// 		AccessSecret: secret,
-// 		Endpoint:     endpoint,
+	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
+)
 
-// 		Secure: false,
-// 	}
+func getClient() rustfs.RustfsAdmin {
+	endpoint := os.Getenv("RUSTFS_ENDPOINT")
+	key := os.Getenv("RUSTFS_KEY")
+	secret := os.Getenv("RUSTFS_SECRET")
 
-// 	dut, _ := rustfs.New(config)
-// 	return dut
-// }
+	config := rustfs.RustfsAdminConfig{
+		AccessKey:    key,
+		AccessSecret: secret,
+		Endpoint:     endpoint,
 
-// func TestCreateServiceAccount(t *testing.T) {
-// 	account := rustfs.ServiceAccount{
-// 		AccessKey: "gocreated",
-// 		SecretKey: "someSuperS3cret",
-// 		Name:      "juhuay",
-// 	}
-// 	dut := getClient()
-// 	err := dut.CreateServiceAccount(account)
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
+		Ssl: false,
+	}
+
+	dut, _ := rustfs.New(config)
+	return dut
+}
+
+func TestCreateServiceAccount(t *testing.T) {
+	account := rustfs.ServiceAccount{
+		AccessKey: "gocreated",
+		SecretKey: "someSuperS3cret",
+		Name:      "juhuay",
+	}
+	dut := getClient()
+	err := dut.CreateServiceAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+}

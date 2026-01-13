@@ -9,11 +9,11 @@ type ServiceAccount struct {
 	AccessKey     string `json:"accessKey"`
 	SecretKey     string `json:"secretKey"`
 	Description   string `json:"description"`
-	Expiration    string `json:"expiration"`
-	Expiry        string `json:"expiry"`
+	Expiration    string `json:"expiration,omitempty"`
+	Expiry        bool   `json:"expiry"`
 	Name          string `json:"name"`
 	ImpliedPolicy bool   `json:"impliedPolicy"`
-	Policy        string `json:"policy"`
+	Policy        string `json:"policy,omitempty"`
 }
 
 type serviceAccountCredentails struct {
@@ -27,6 +27,14 @@ type ServiceAccountReply struct {
 }
 
 func (c RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
+
+	// Set some defaults
+	if account.Expiration == "" {
+		account.Expiration = "9999-01-01T00:00:00.000Z"
+	}
+	if account.Policy == "" {
+		account.ImpliedPolicy = true
+	}
 
 	bytes, err := json.Marshal(account)
 	if err != nil {
