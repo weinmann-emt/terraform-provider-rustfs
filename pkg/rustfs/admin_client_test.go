@@ -8,8 +8,8 @@ import (
 )
 
 func TestIsAdmin(t *testing.T) {
-	endpoint := os.Getenv("RUSTFS_SERVER")
-	key := os.Getenv("RUSTFS_USER")
+	endpoint := os.Getenv("RUSTFS_ENDPOINT")
+	key := os.Getenv("RUSTFS_KEY")
 	secret := os.Getenv("RUSTFS_SECRET")
 
 	config := rustfs.RustfsAdminConfig{
@@ -17,7 +17,7 @@ func TestIsAdmin(t *testing.T) {
 		AccessSecret: secret,
 		Endpoint:     endpoint,
 
-		Secure: false,
+		Ssl: false,
 	}
 
 	dut, _ := rustfs.New(config)

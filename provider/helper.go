@@ -8,19 +8,19 @@ import (
 
 func generateMinioConfig(model RustfsProviderModel) (config *minio.S3MinioConfig, err error) {
 
-	endpoint := os.Getenv("RUSTFS_SERVER")
+	endpoint := os.Getenv("RUSTFS_ENDPOINT")
 	if endpoint == "" {
-		endpoint = model.Server.String()
+		endpoint = model.Endpoint.String()
 	}
 
 	user := os.Getenv("RUSTFS_USER")
 	if user == "" {
-		user = model.Username.String()
+		user = model.AccessKey.String()
 	}
 
 	secret := os.Getenv("RUSTFS_SECRET")
 	if secret == "" {
-		secret = model.Username.String()
+		secret = model.AccessSecret.String()
 	}
 
 	config = &minio.S3MinioConfig{
