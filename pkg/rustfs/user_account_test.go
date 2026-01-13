@@ -17,6 +17,10 @@ func TestCreateUserAccount(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	err = dut.DeleteUserAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
 }
 
 func TestCreateUserAccountWithGrp(t *testing.T) {
@@ -28,6 +32,10 @@ func TestCreateUserAccountWithGrp(t *testing.T) {
 	}
 	dut := getClient()
 	err := dut.CreateUserAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dut.DeleteUserAccount(account)
 	if err != nil {
 		t.Error(err)
 	}

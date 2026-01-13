@@ -42,8 +42,9 @@ func (c RustfsAdmin) CreateUserAccount(user UserAccount) error {
 	if err != nil {
 		return err
 	}
-
-	err = c.addUserToGroup(user.AccessKey, user.Group)
+	if user.Group != "" {
+		return c.addUserToGroup(user.AccessKey, user.Group)
+	}
 	return err
 }
 
