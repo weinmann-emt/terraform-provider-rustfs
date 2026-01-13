@@ -39,6 +39,20 @@ func randomString(length int) string {
 	return string(result)
 }
 
+func TestCreateServiceAccount(t *testing.T) {
+
+	account := rustfs.ServiceAccount{
+		AccessKey: randomString(8),
+		SecretKey: "someSuperS3cret",
+		Name:      randomString(8),
+	}
+	dut := getClient()
+	err := dut.CreateServiceAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
 func TestCreateAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
@@ -48,6 +62,10 @@ func TestCreateAndDeleteServiceAccount(t *testing.T) {
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dut.DeleteServiceAccount(account)
 	if err != nil {
 		t.Error(err)
 	}
