@@ -1,8 +1,10 @@
 package rustfs_test
 
 import (
+	"math/rand"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
@@ -24,11 +26,25 @@ func getClient() rustfs.RustfsAdmin {
 	return dut
 }
 
-func TestCreateServiceAccount(t *testing.T) {
+func randomString(length int) string {
+	rand.Seed(time.Now().UnixNano())
+
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	result := make([]byte, length)
+
+	for i := range result {
+		result[i] = charset[rand.Intn(len(charset))]
+	}
+
+	return string(result)
+}
+
+func TestCreateAndDeleteServiceAccount(t *testing.T) {
+
 	account := rustfs.ServiceAccount{
-		AccessKey: "gocreated",
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      "juhuay",
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)

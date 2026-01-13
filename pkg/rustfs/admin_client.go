@@ -6,6 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -78,6 +80,11 @@ func (c *RustfsAdmin) doRequest(ctx context.Context, reqData RequestData) (res *
 	}
 
 	res, err = c.httpClient.Do(req)
+	if res.StatusCode != 200 {
+		body, _ := io.ReadAll(res.Body)
+		return res, errors.New(string(body))
+	}
+
 	return
 }
 
