@@ -11,6 +11,7 @@ type UserAccount struct {
 	Status    string `json:"status"`
 	AccessKey string
 	policy    string
+	Group     string `json:"-"`
 }
 
 type UserInfo struct {
@@ -41,7 +42,9 @@ func (c RustfsAdmin) CreateUserAccount(user UserAccount) error {
 	if err != nil {
 		return err
 	}
-	return nil
+
+	err = c.addUserToGroup(user.AccessKey, user.Group)
+	return err
 }
 
 func (c RustfsAdmin) ReadUserAccount(name string) (UserInfo, error) {
@@ -93,5 +96,20 @@ func (c RustfsAdmin) DeleteUserAccount(account UserAccount) error {
 	if err != nil {
 		return err
 	}
+	return err
+}
+
+func (c RustfsAdmin) addUserToGroup(user string, group string) error {
+	urlValues := make(url.Values)
+	urlValues.Set("userOrGroup", user)
+	urlValues.Set("policyName", group)
+	urlValues.Set("isGroup", "false")
+	req_data := RequestData{
+		Method:      "PUT",
+		RelPath:     "set-user-or-group-policy",
+		QueryValues: urlValues,
+	}
+	ctx, _ := context.WithCancel(context.Background())
+	_, err := c.doRequest(ctx, req_data)
 	return err
 }
