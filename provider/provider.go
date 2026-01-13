@@ -12,6 +12,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
 // Ensure RustfsProvider satisfies various provider interfaces.
@@ -78,6 +79,7 @@ func (p *RustfsProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	client := AllClient{
 		S3MinioClient: aclient.(minio.S3MinioClient),
+		RustClient:    rustfs.New(generateRustClientConfig(config)),
 	}
 
 	if err != nil {

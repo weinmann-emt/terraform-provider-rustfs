@@ -20,7 +20,7 @@ func TestIsAdmin(t *testing.T) {
 		Ssl: false,
 	}
 
-	dut, _ := rustfs.New(config)
+	dut := rustfs.New(&config)
 	admin, _ := dut.IsAdmin()
 	if !admin {
 		t.Error("User is no admin")

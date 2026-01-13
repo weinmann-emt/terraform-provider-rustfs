@@ -18,7 +18,7 @@ type Policy struct {
 	Name      string
 }
 
-func (c RustfsAdmin) CreatePolicy(policy Policy) error {
+func (c *RustfsAdmin) CreatePolicy(policy Policy) error {
 	urlValues := make(url.Values)
 	urlValues.Set("name", policy.Name)
 	policy.Version = "2012-10-17" // only this is working
@@ -41,7 +41,7 @@ func (c RustfsAdmin) CreatePolicy(policy Policy) error {
 	return nil
 }
 
-func (c RustfsAdmin) ReadPolicy(policy string) (Policy, error) {
+func (c *RustfsAdmin) ReadPolicy(policy string) (Policy, error) {
 	var instance Policy
 	urlValues := make(url.Values)
 	urlValues.Set("name", policy)
@@ -61,7 +61,7 @@ func (c RustfsAdmin) ReadPolicy(policy string) (Policy, error) {
 	return instance, nil
 }
 
-func (c RustfsAdmin) DeletePolicy(policy string) error {
+func (c *RustfsAdmin) DeletePolicy(policy string) error {
 
 	urlValues := make(url.Values)
 	urlValues.Set("name", policy)

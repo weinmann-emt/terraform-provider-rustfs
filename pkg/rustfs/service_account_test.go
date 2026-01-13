@@ -22,7 +22,7 @@ func getClient() rustfs.RustfsAdmin {
 		Ssl: false,
 	}
 
-	dut, _ := rustfs.New(config)
+	dut := rustfs.New(&config)
 	return dut
 }
 

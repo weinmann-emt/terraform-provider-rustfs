@@ -44,8 +44,8 @@ type RequestData struct {
 	Method        string
 }
 
-func New(config RustfsAdminConfig) (client RustfsAdmin, err error) {
-	endpoint, err := client.createEndpointUrl(config.Endpoint, config.Ssl)
+func New(config *RustfsAdminConfig) (client RustfsAdmin) {
+	endpoint, _ := client.createEndpointUrl(config.Endpoint, config.Ssl)
 	client.endpointURL = endpoint
 	client.httpClient = &http.Client{}
 	client.accessKey = config.AccessKey

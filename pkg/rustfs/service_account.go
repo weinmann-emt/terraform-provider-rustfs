@@ -36,7 +36,7 @@ type ServiceAccountReply struct {
 	Credentials serviceAccountCredentails `json:"credentials"`
 }
 
-func (c RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
+func (c *RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
 	normalizeServiceAccount(&account)
 	bytes, err := json.Marshal(account)
 	if err != nil {
@@ -57,7 +57,7 @@ func (c RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
 	return err
 }
 
-func (c RustfsAdmin) ReadServiceAccount(name string) (ServiceAccount, error) {
+func (c *RustfsAdmin) ReadServiceAccount(name string) (ServiceAccount, error) {
 	var instance ServiceAccount
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", name)
@@ -75,7 +75,7 @@ func (c RustfsAdmin) ReadServiceAccount(name string) (ServiceAccount, error) {
 	return instance, nil
 }
 
-func (c RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
+func (c *RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
 	normalizeServiceAccount(&account)
 	updateRequest := createUpdate(account)
 	urlValues := make(url.Values)
@@ -98,7 +98,7 @@ func (c RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
 	return err
 }
 
-func (c RustfsAdmin) DeleteServiceAccount(account ServiceAccount) error {
+func (c *RustfsAdmin) DeleteServiceAccount(account ServiceAccount) error {
 	normalizeServiceAccount(&account)
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", account.AccessKey)

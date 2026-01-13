@@ -19,7 +19,7 @@ type UserInfo struct {
 	Groups []string `json:"memberOf"`
 }
 
-func (c RustfsAdmin) CreateUserAccount(user UserAccount) error {
+func (c *RustfsAdmin) CreateUserAccount(user UserAccount) error {
 
 	user.Status = "enabled"
 	urlValues := make(url.Values)
@@ -48,7 +48,7 @@ func (c RustfsAdmin) CreateUserAccount(user UserAccount) error {
 	return err
 }
 
-func (c RustfsAdmin) ReadUserAccount(name string) (UserInfo, error) {
+func (c *RustfsAdmin) ReadUserAccount(name string) (UserInfo, error) {
 	var instance UserInfo
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", name)
@@ -67,7 +67,7 @@ func (c RustfsAdmin) ReadUserAccount(name string) (UserInfo, error) {
 
 }
 
-func (c RustfsAdmin) UpdateUserAccount(account UserAccount) error {
+func (c *RustfsAdmin) UpdateUserAccount(account UserAccount) error {
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", account.AccessKey)
 	urlValues.Set("status", account.Status)
@@ -84,7 +84,7 @@ func (c RustfsAdmin) UpdateUserAccount(account UserAccount) error {
 	return nil
 }
 
-func (c RustfsAdmin) DeleteUserAccount(account UserAccount) error {
+func (c *RustfsAdmin) DeleteUserAccount(account UserAccount) error {
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", account.AccessKey)
 	req_data := RequestData{
@@ -100,7 +100,7 @@ func (c RustfsAdmin) DeleteUserAccount(account UserAccount) error {
 	return err
 }
 
-func (c RustfsAdmin) addUserToGroup(user string, group string) error {
+func (c *RustfsAdmin) addUserToGroup(user string, group string) error {
 	urlValues := make(url.Values)
 	urlValues.Set("userOrGroup", user)
 	urlValues.Set("policyName", group)
