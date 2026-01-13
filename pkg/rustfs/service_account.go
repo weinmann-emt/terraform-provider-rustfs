@@ -56,21 +56,22 @@ func (c RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
 	return err
 }
 
-func (c RustfsAdmin) DeleteServiceAccount(account ServiceAccount) error {
-	normalizeServiceAccount(&account)
+func (c RustfsAdmin) ReadServiceAccount(name string) (ServiceAccount, error) {
+	var instance ServiceAccount
 	urlValues := make(url.Values)
-	urlValues.Set("accessKey", account.AccessKey)
+	urlValues.Set("accessKey", name)
 	req_data := RequestData{
-		Method:      "DELETE",
-		RelPath:     "delete-service-accounts",
+		Method:      "GET",
+		RelPath:     "info-service-account",
 		QueryValues: urlValues,
 	}
 	ctx, _ := context.WithCancel(context.Background())
-	_, err := c.doRequest(ctx, req_data)
+	resp, err := c.doRequest(ctx, req_data)
 	if err != nil {
-		return err
+		return instance, err
 	}
-	return err
+	err = json.NewDecoder(resp.Body).Decode(&instance)
+	return instance, nil
 }
 
 func (c RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
@@ -90,6 +91,23 @@ func (c RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
 	}
 	ctx, _ := context.WithCancel(context.Background())
 	_, err = c.doRequest(ctx, req_data)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
+func (c RustfsAdmin) DeleteServiceAccount(account ServiceAccount) error {
+	normalizeServiceAccount(&account)
+	urlValues := make(url.Values)
+	urlValues.Set("accessKey", account.AccessKey)
+	req_data := RequestData{
+		Method:      "DELETE",
+		RelPath:     "delete-service-accounts",
+		QueryValues: urlValues,
+	}
+	ctx, _ := context.WithCancel(context.Background())
+	_, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return err
 	}

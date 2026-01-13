@@ -92,3 +92,27 @@ func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 		t.Error(err)
 	}
 }
+func TestCreateReadAndDeleteServiceAccount(t *testing.T) {
+
+	account := rustfs.ServiceAccount{
+		AccessKey: randomString(8),
+		SecretKey: "someSuperS3cret",
+		Name:      randomString(8),
+	}
+	dut := getClient()
+	err := dut.CreateServiceAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+	reply, err := dut.ReadServiceAccount(account.AccessKey)
+	if err != nil {
+		t.Error(err)
+	}
+	if reply.Name != account.Name {
+		t.Error("Read value not matching")
+	}
+	err = dut.DeleteServiceAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+}
