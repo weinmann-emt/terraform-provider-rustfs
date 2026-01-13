@@ -1,10 +1,13 @@
 package rustfs
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -21,13 +24,13 @@ type RustfsAdminConfig struct {
 	AccessKey    string
 	AccessSecret string
 	Endpoint     string
-	SkipSsl      bool
-	Secure       bool
+	Ssl          bool
+	Insecure     bool
 }
 
 type RustfsAdmin struct {
 	httpClient   *http.Client
-	secure       bool
+	insecure     bool
 	endpointURL  string
 	accessKey    string
 	accessSecret string
@@ -42,7 +45,7 @@ type RequestData struct {
 }
 
 func New(config RustfsAdminConfig) (client RustfsAdmin, err error) {
-	endpoint, err := client.createEndpointUrl(config.Endpoint, config.Secure)
+	endpoint, err := client.createEndpointUrl(config.Endpoint, config.Ssl)
 	client.endpointURL = endpoint
 	client.httpClient = &http.Client{}
 	client.accessKey = config.AccessKey
@@ -77,6 +80,11 @@ func (c *RustfsAdmin) doRequest(ctx context.Context, reqData RequestData) (res *
 	}
 
 	res, err = c.httpClient.Do(req)
+	if res.StatusCode != 200 {
+		body, _ := io.ReadAll(res.Body)
+		return res, errors.New(string(body))
+	}
+
 	return
 }
 
@@ -105,7 +113,7 @@ func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*
 		urlStr = urlStr + "?" + s3utils.QueryEncode(request.QueryValues)
 	}
 
-	req, err := http.NewRequestWithContext(ctx, request.Method, urlStr, nil)
+	req, err := http.NewRequestWithContext(ctx, request.Method, urlStr, bytes.NewReader(request.Content))
 	if err != nil {
 		return nil, err
 	}
@@ -116,6 +124,6 @@ func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*
 	req.Header.Set("X-Amz-Content-Sha256", hex.EncodeToString(sum[:]))
 
 	// sign using minio go (too stupid to get it done self)
-	req = signer.SignV4(*req, c.accessKey, c.accessSecret, "", "")
+	req = signer.SignV4(*req, c.accessKey, c.accessSecret, "", "us-east-01")
 	return req, nil
 }
