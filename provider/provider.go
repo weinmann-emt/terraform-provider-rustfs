@@ -6,7 +6,6 @@ package provider
 import (
 	"context"
 
-	"github.com/aminueza/terraform-provider-minio/minio"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -29,8 +28,8 @@ type RustfsProvider struct {
 // RustfsProviderModel describes the provider data model.
 type RustfsProviderModel struct {
 	Endpoint     types.String `tfsdk:"endpoint"`
-	AccessKey    types.String `tfsdk:"accessKey"`
-	AccessSecret types.String `tfsdk:"accessSecret"`
+	AccessKey    types.String `tfsdk:"access_key"`
+	AccessSecret types.String `tfsdk:"access_secret"`
 	Ssl          types.Bool   `tfsdk:"ssl"`
 	Insecure     types.Bool   `tfsdk:"insecure"`
 }
@@ -47,18 +46,18 @@ func (p *RustfsProvider) Schema(ctx context.Context, req provider.SchemaRequest,
 				Required:    true,
 				Description: "MinIO server endpoint in the format host:port",
 			},
-			"accessKey": schema.StringAttribute{
+			"access_key": schema.StringAttribute{
 				Required: true,
 			},
-			"accessSecret": schema.StringAttribute{
+			"access_secret": schema.StringAttribute{
 				Required:  true,
 				Sensitive: true,
 			},
 			"insecure": schema.BoolAttribute{
-				Required: false,
+				Optional: true,
 			},
 			"ssl": schema.BoolAttribute{
-				Required: false,
+				Optional: true,
 			},
 		},
 	}
@@ -74,31 +73,31 @@ func (p *RustfsProvider) Configure(ctx context.Context, req provider.ConfigureRe
 	}
 
 	// Example client configuration for data sources and resources
-	accessConfig, _ := generateMinioConfig(config)
-	aclient, err := accessConfig.NewClient()
+	// accessConfig, _ := generateMinioConfig(config)
+	// aclient, err := accessConfig.NewClient()
 
-	client := AllClient{
-		S3MinioClient: aclient.(minio.S3MinioClient),
-		RustClient:    rustfs.New(generateRustClientConfig(config)),
+	client := &AllClient{
+		// S3MinioClient: aclient,
+		RustClient: rustfs.New(generateRustClientConfig(config)),
 	}
 
-	if err != nil {
-		resp.Diagnostics.AddError(err.Error(), err.Error())
-		return
-	}
+	// if err != nil {
+	// 	resp.Diagnostics.AddError(err.Error(), err.Error())
+	// 	return
+	// }
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
 
 func (p *RustfsProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
-		NewExampleResource,
+		NewUserRessource,
 	}
 }
 
 func (p *RustfsProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		NewExampleDataSource,
+		// NewExampleDataSource,
 	}
 }
 

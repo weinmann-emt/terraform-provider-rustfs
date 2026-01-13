@@ -2,32 +2,38 @@ package provider
 
 import (
 	"context"
+	"fmt"
 
-	"github.com/aminueza/terraform-provider-minio/minio"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
+	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &ExampleResource{}
-var _ resource.ResourceWithImportState = &ExampleResource{}
+var _ resource.Resource = &RustfsUserRessource{}
+var _ resource.ResourceWithImportState = &RustfsUserRessource{}
 
 // ExampleResource defines the resource implementation.
 type RustfsUserRessource struct {
-	client *minio.S3MinioClient
+	client *AllClient
 }
 
 type RustfsUserRessourceModel struct {
-	AccessKey types.String `tfsdk:"accessKey"`
-	SecretKey types.String `tfsdk:"secretKey"`
+	AccessKey types.String `tfsdk:"access_key"`
+	SecretKey types.String `tfsdk:"secret_key"`
 	Status    types.String `tfsdk:"status"`
-	Group     types.String `tfsdk:"group"`
-	Id        types.String `tfsdk:"id"`
+	// ID        types.String `tfsdk:"id"`
+	// Group     types.String `tfsdk:"group"`
+	// Id        types.String `tfsdk:"id"`
 }
 
+func NewUserRessource() resource.Resource {
+	return &RustfsUserRessource{}
+}
 func (r *RustfsUserRessource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_user"
 }
@@ -38,50 +44,158 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 		MarkdownDescription: "RustFS user",
 
 		Attributes: map[string]schema.Attribute{
-			"accessKey": schema.StringAttribute{
+			// "last_updated": schema.StringAttribute{
+			// 	Computed: true,
+			// },
+			// "id": schema.StringAttribute{
+			// 	Computed: true,
+			// 	PlanModifiers: []planmodifier.String{
+			// 		stringplanmodifier.UseStateForUnknown(),
+			// 	},
+			// },
+			"access_key": schema.StringAttribute{
 				MarkdownDescription: "Access Key",
-				Optional:            false,
+				Required:            true,
 			},
-			"secretKey": schema.StringAttribute{
+			"secret_key": schema.StringAttribute{
 				MarkdownDescription: "Secret Key",
-				Optional:            false,
+				Required:            true,
 			},
 			"status": schema.StringAttribute{
 				Computed:            true,
 				MarkdownDescription: "Status",
+				Default:             stringdefault.StaticString("enabled"),
 			},
-			"group": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "User Group",
-			},
-			"id": schema.StringAttribute{
-				Computed:            true,
-				MarkdownDescription: "Example identifier",
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.UseStateForUnknown(),
-				},
-			},
+			// "group": schema.StringAttribute{
+			// 	Optional:            true,
+			// 	MarkdownDescription: "User Group",
+			// },
+			// "id": schema.StringAttribute{
+			// 	Computed:            true,
+			// 	MarkdownDescription: "Example identifier",
+			// 	PlanModifiers: []planmodifier.String{
+			// 		stringplanmodifier.UseStateForUnknown(),
+			// 	},
+			// },
 		},
 	}
 }
+func (r *RustfsUserRessource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+	if req.ProviderData == nil {
+		return
+	}
+	client, ok := req.ProviderData.(*AllClient)
+	if !ok {
+		resp.Diagnostics.AddError(
+			"Unexpected Data Source Configure Type",
+			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+		)
 
-// func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+		return
+	}
 
-// 	var data RustfsUserRessourceModel
-// 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+	r.client = client
 
-// 	if resp.Diagnostics.HasError() {
-// 		return
-// 	}
-// 	data.Id = data.AccessKey
+}
+func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	// Retrieve values from plan
+	var plan RustfsUserRessourceModel
+	diags := req.Plan.Get(ctx, &plan)
 
-// 	account := rustfs.UserAccount{
-// 		AccessKey: data.AccessKey.String(),
-// 		SecretKey: data.SecretKey.String(),
-// 		Group:     data.Group.String(),
-// 		Status:    data.Status.String(),
-// 	}
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
 
-// 	tflog.Trace(ctx, "created a resource")
-// 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
-// }
+	account := rustfs.UserAccount{
+		AccessKey: plan.AccessKey.ValueString(),
+		SecretKey: plan.SecretKey.ValueString(),
+		// Group:     data.Group.String(),
+		// Status: plan.Status.ValueString(),
+	}
+
+	err := r.client.RustClient.CreateUserAccount(account)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error creating order",
+			"Could not create order, unexpected error: "+err.Error(),
+		)
+		return
+	}
+	tflog.Trace(ctx, "created a resource")
+	// plan.ID = types.StringValue(account.AccessKey)
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
+	// plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+}
+
+func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state RustfsUserRessourceModel
+	diags := req.State.Get(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	read, err := r.client.RustClient.ReadUserAccount(state.AccessKey.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading user",
+			"Could read: "+err.Error(),
+		)
+		return
+	}
+	state.Status = types.StringValue(read.Status)
+	state.AccessKey = types.StringValue(state.AccessKey.ValueString())
+	state.SecretKey = types.StringValue(state.SecretKey.ValueString())
+	// state.ID = types.StringValue(state.ID.ValueString())
+
+	// Save updated data into Terraform state
+	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
+	diags = resp.State.Set(ctx, &state)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+}
+func (r *RustfsUserRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan RustfsUserRessourceModel
+	diags := req.Plan.Get(ctx, &plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	diags = resp.State.Set(ctx, plan)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	// plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
+}
+
+func (r *RustfsUserRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data RustfsUserRessourceModel
+
+	// Read Terraform prior state data into the model
+	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	account := rustfs.UserAccount{
+		AccessKey: data.AccessKey.ValueString(),
+	}
+	err := r.client.RustClient.DeleteUserAccount(account)
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+	}
+}
+
+func (r *RustfsUserRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+}

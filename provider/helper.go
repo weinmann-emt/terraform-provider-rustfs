@@ -44,17 +44,17 @@ func generateRustClientConfig(model RustfsProviderModel) *rustfs.RustfsAdminConf
 
 	endpoint := os.Getenv("RUSTFS_ENDPOINT")
 	if endpoint == "" {
-		endpoint = model.Endpoint.String()
+		endpoint = model.Endpoint.ValueString()
 	}
 
 	user := os.Getenv("RUSTFS_USER")
 	if user == "" {
-		user = model.AccessKey.String()
+		user = model.AccessKey.ValueString()
 	}
 
 	secret := os.Getenv("RUSTFS_SECRET")
 	if secret == "" {
-		secret = model.AccessSecret.String()
+		secret = model.AccessSecret.ValueString()
 	}
 
 	config := &rustfs.RustfsAdminConfig{

@@ -11,12 +11,8 @@ type UserAccount struct {
 	Status    string `json:"status"`
 	AccessKey string
 	policy    string
-	Group     string `json:"-"`
-}
-
-type UserInfo struct {
-	Status string   `json:"status"`
-	Groups []string `json:"memberOf"`
+	Group     string   `json:"-"`
+	Groups    []string `json:"memberOf"`
 }
 
 func (c *RustfsAdmin) CreateUserAccount(user UserAccount) error {
@@ -48,8 +44,8 @@ func (c *RustfsAdmin) CreateUserAccount(user UserAccount) error {
 	return err
 }
 
-func (c *RustfsAdmin) ReadUserAccount(name string) (UserInfo, error) {
-	var instance UserInfo
+func (c *RustfsAdmin) ReadUserAccount(name string) (UserAccount, error) {
+	var instance UserAccount
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", name)
 	req_data := RequestData{
@@ -63,6 +59,7 @@ func (c *RustfsAdmin) ReadUserAccount(name string) (UserInfo, error) {
 		return instance, err
 	}
 	err = json.NewDecoder(resp.Body).Decode(&instance)
+	instance.AccessKey = name
 	return instance, nil
 
 }
