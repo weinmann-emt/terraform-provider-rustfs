@@ -17,6 +17,14 @@ type ServiceAccount struct {
 	Policy        string `json:"policy,omitempty"`
 }
 
+type ServiceAccountUpdate struct {
+	NewAccessKey   string `json:"newAccessKey"`
+	NewSecretKey   string `json:"newSecretKey"`
+	NewDescription string `json:"newDescription"`
+	NewExpiration  string `json:"newExpiration,omitempty"`
+	NewName        string `json:"newName"`
+}
+
 type serviceAccountCredentails struct {
 	AccessKey  string `json:"accessKey"`
 	SecretKey  string `json:"secretKey"`
@@ -65,6 +73,29 @@ func (c RustfsAdmin) DeleteServiceAccount(account ServiceAccount) error {
 	return err
 }
 
+func (c RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
+	normalizeServiceAccount(&account)
+	updateRequest := createUpdate(account)
+	urlValues := make(url.Values)
+	urlValues.Set("accessKey", account.AccessKey)
+	bytes, err := json.Marshal(updateRequest)
+	if err != nil {
+		return err
+	}
+	req_data := RequestData{
+		Method:      "POST",
+		RelPath:     "update-service-account",
+		QueryValues: urlValues,
+		Content:     bytes,
+	}
+	ctx, _ := context.WithCancel(context.Background())
+	_, err = c.doRequest(ctx, req_data)
+	if err != nil {
+		return err
+	}
+	return err
+}
+
 func normalizeServiceAccount(account *ServiceAccount) {
 	// Set some defaults
 	if account.Expiration == "" {
@@ -72,5 +103,15 @@ func normalizeServiceAccount(account *ServiceAccount) {
 	}
 	if account.Policy == "" {
 		account.ImpliedPolicy = true
+	}
+}
+
+func createUpdate(account ServiceAccount) ServiceAccountUpdate {
+	return ServiceAccountUpdate{
+		NewAccessKey:   account.AccessKey,
+		NewSecretKey:   account.SecretKey,
+		NewDescription: account.Description,
+		NewExpiration:  account.Expiration,
+		NewName:        account.Name,
 	}
 }

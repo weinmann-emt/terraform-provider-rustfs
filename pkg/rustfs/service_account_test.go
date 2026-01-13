@@ -70,3 +70,25 @@ func TestCreateAndDeleteServiceAccount(t *testing.T) {
 		t.Error(err)
 	}
 }
+func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
+
+	account := rustfs.ServiceAccount{
+		AccessKey: randomString(8),
+		SecretKey: "someSuperS3cret",
+		Name:      randomString(8),
+	}
+	dut := getClient()
+	err := dut.CreateServiceAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+	account.SecretKey = "insecureOne"
+	err = dut.UpdateServiceAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+	err = dut.DeleteServiceAccount(account)
+	if err != nil {
+		t.Error(err)
+	}
+}
