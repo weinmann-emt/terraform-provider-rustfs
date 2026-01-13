@@ -6,7 +6,6 @@ import (
 	"github.com/aminueza/terraform-provider-minio/minio"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/booldefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -22,31 +21,38 @@ type RustfsUserRessource struct {
 }
 
 type RustfsUserRessourceModel struct {
-	ConfigurableAttribute types.String `tfsdk:"configurable_attribute"`
-	Defaulted             types.String `tfsdk:"defaulted"`
-	Id                    types.String `tfsdk:"id"`
+	AccessKey types.String `tfsdk:"accessKey"`
+	SecretKey types.String `tfsdk:"secretKey"`
+	Status    types.String `tfsdk:"status"`
+	Group     types.String `tfsdk:"group"`
+	Id        types.String `tfsdk:"id"`
 }
 
-func (r *RustfsUserRessourceModel) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *RustfsUserRessource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_user"
 }
 
-func (r *RustfsUserRessourceModel) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "User resource",
+		MarkdownDescription: "RustFS user",
 
 		Attributes: map[string]schema.Attribute{
-			"configurable_attribute": schema.StringAttribute{
-				MarkdownDescription: "Example configurable attribute",
-				Optional:            true,
+			"accessKey": schema.StringAttribute{
+				MarkdownDescription: "Access Key",
+				Optional:            false,
 			},
-			"enabled": schema.BoolAttribute{
-				MarkdownDescription: "Is the user enables",
-				Optional:            true,
-				Computed:            false,
-				// https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-resource-create
-				Default: booldefault.StaticBool(true),
+			"secretKey": schema.StringAttribute{
+				MarkdownDescription: "Secret Key",
+				Optional:            false,
+			},
+			"status": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "Status",
+			},
+			"group": schema.StringAttribute{
+				Computed:            true,
+				MarkdownDescription: "User Group",
 			},
 			"id": schema.StringAttribute{
 				Computed:            true,
@@ -58,3 +64,24 @@ func (r *RustfsUserRessourceModel) Schema(ctx context.Context, req resource.Sche
 		},
 	}
 }
+
+// func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+
+// 	var data RustfsUserRessourceModel
+// 	resp.Diagnostics.Append(req.Plan.Get(ctx, &data)...)
+
+// 	if resp.Diagnostics.HasError() {
+// 		return
+// 	}
+// 	data.Id = data.AccessKey
+
+// 	account := rustfs.UserAccount{
+// 		AccessKey: data.AccessKey.String(),
+// 		SecretKey: data.SecretKey.String(),
+// 		Group:     data.Group.String(),
+// 		Status:    data.Status.String(),
+// 	}
+
+// 	tflog.Trace(ctx, "created a resource")
+// 	resp.Diagnostics.Append(resp.State.Set(ctx, &data)...)
+// }

@@ -6,6 +6,7 @@ package provider
 import (
 	"context"
 
+	"github.com/aminueza/terraform-provider-minio/minio"
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
@@ -73,7 +74,12 @@ func (p *RustfsProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	// Example client configuration for data sources and resources
 	accessConfig, _ := generateMinioConfig(config)
-	client, err := accessConfig.NewClient()
+	aclient, err := accessConfig.NewClient()
+
+	client := AllClient{
+		S3MinioClient: aclient.(minio.S3MinioClient),
+	}
+
 	if err != nil {
 		resp.Diagnostics.AddError(err.Error(), err.Error())
 		return
