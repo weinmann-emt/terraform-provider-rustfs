@@ -96,6 +96,7 @@ func (r *ServiceAccountRessource) Create(ctx context.Context, req resource.Creat
 		AccessKey:   plan.AccessKey.ValueString(),
 		SecretKey:   plan.SecretKey.ValueString(),
 		Description: plan.Description.ValueString(),
+		TargetUser:  plan.TargetUser.ValueString(),
 	}
 	err := r.client.RustClient.CreateServiceAccount(account)
 	if err != nil {
