@@ -92,6 +92,7 @@ func (p *RustfsProvider) Configure(ctx context.Context, req provider.ConfigureRe
 func (p *RustfsProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewUserRessource,
+		NewPolicyRessource,
 	}
 }
 

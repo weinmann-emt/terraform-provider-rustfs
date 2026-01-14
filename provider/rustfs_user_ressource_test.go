@@ -41,9 +41,10 @@ var (
 	}
 )
 
-func TestAccOrderResource(t *testing.T) {
+// Due to TestAcc this is _only_ an acceptance test
+func TestAccUserResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
-		// ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
 		Steps: []resource.TestStep{
 			// Create and Read testing
 			{

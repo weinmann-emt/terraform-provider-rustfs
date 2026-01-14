@@ -86,6 +86,7 @@ func (c *RustfsAdmin) ReadPolicy(policy string) (Policy, error) {
 		return Policy{}, err
 	}
 	read.Name = instance.PolicyName
+	read.Version = "2012-10-17"
 	err = json.NewDecoder(strings.NewReader(instance.Policy)).Decode(&statement)
 	// We have no error!
 	if err == nil {

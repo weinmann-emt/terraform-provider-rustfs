@@ -26,3 +26,5 @@ provider_installation {
 }
 ```
 
+## Publish
+ToDo: https://developer.hashicorp.com/terraform/registry/providers/publishing
