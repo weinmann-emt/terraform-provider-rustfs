@@ -14,10 +14,10 @@ At the moment I was not able to get a good api definition. Will try: https://dee
 
 ## Acceptanc testing
 
-Unit test performed with pkg work simply out of the box. 
+Unit test performed with pkg work simply out of the box.
 To perform acceptance test of the provider we need to follow: https://developer.hashicorp.com/terraform/tutorials/providers-plugin-framework/providers-plugin-framework-provider#prepare-terraform-for-local-provider-install
 
- ~/.terraform
+ ~/.terraformrc
 ```
 provider_installation {
   dev_overrides {
