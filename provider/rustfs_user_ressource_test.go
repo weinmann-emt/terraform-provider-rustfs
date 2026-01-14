@@ -1,14 +1,11 @@
-package provider_test
+package provider
 
 import (
 
 	// "github.com/hashicorp/terraform-plugin-framework/provider"
 	"testing"
 
-	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
-	"github.com/weinmann-emt/terraform-provider-rustfs/provider"
 )
 
 const (
@@ -30,16 +27,6 @@ provider "rustfs" {
   ssl= false
 }
 `
-)
-
-var (
-	// testAccProtoV6ProviderFactories are used to instantiate a provider during
-	// acceptance testing. The factory function will be invoked for every Terraform
-	// CLI command executed to create a provider server to which the CLI can
-	// reattach.
-	testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
-		"rustfs": providerserver.NewProtocol6WithError(provider.New("test")()),
-	}
 )
 
 // Due to TestAcc this is _only_ an acceptance test
