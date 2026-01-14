@@ -31,6 +31,12 @@ func TestCreateAndDeletePolicy(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+
+	read, _ := dut.ReadPolicy(policy.Name)
+	if read.Name != policy.Name {
+		t.Error("read back not working")
+	}
+
 	err = dut.DeletePolicy(name)
 	if err != nil {
 		t.Error(err)
