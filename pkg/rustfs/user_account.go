@@ -10,8 +10,7 @@ type UserAccount struct {
 	SecretKey string `json:"secretKey"`
 	Status    string `json:"status"`
 	AccessKey string
-	policy    string
-	Group     string   `json:"-"`
+	Policy    string   `json:"policyName"`
 	Groups    []string `json:"memberOf"`
 }
 
@@ -38,8 +37,9 @@ func (c *RustfsAdmin) CreateUserAccount(user UserAccount) error {
 	if err != nil {
 		return err
 	}
-	if user.Group != "" {
-		return c.addUserToGroup(user.AccessKey, user.Group)
+
+	if user.Policy != "" {
+		return c.addUserToGroup(user.AccessKey, user.Policy)
 	}
 	return err
 }

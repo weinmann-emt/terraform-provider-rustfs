@@ -33,7 +33,7 @@ func TestCreateUserAccountWithGrp(t *testing.T) {
 	account := rustfs.UserAccount{
 		AccessKey: randomString(8),
 		SecretKey: randomString(8),
-		Group:     "readwrite",
+		Policy:    "readwrite",
 	}
 	dut := getClient()
 	err := dut.CreateUserAccount(account)
