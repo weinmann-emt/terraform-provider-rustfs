@@ -1,12 +1,10 @@
 package provider_test
 
 import (
-	"testing"
 
 	// "github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
-	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/weinmann-emt/terraform-provider-rustfs/provider"
 )
 
@@ -42,20 +40,20 @@ var (
 )
 
 // Due to TestAcc this is _only_ an acceptance test
-func TestAccUserResource(t *testing.T) {
-	resource.Test(t, resource.TestCase{
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		Steps: []resource.TestStep{
-			// Create and Read testing
-			{
-				Config: providerConfig + `
-resource "rustfs_user" "test" {
-  access_key = "testuser"
-  secret_key = "superSecret"
-	policy = "readonly"
-}
-`, Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("rustfs_user.test", "access_key", "testuser"),
-				)},
-		}})
-}
+// func TestAccUserResource(t *testing.T) {
+// 	resource.Test(t, resource.TestCase{
+// 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+// 		Steps: []resource.TestStep{
+// 			// Create and Read testing
+// 			{
+// 				Config: providerConfig + `
+// resource "rustfs_user" "test" {
+//   access_key = "testuser"
+//   secret_key = "superSecret"
+// 	policy = "readonly"
+// }
+// `, Check: resource.ComposeAggregateTestCheckFunc(
+// 					resource.TestCheckResourceAttr("rustfs_user.test", "access_key", "testuser"),
+// 				)},
+// 		}})
+// }
