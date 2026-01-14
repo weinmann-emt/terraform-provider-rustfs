@@ -26,8 +26,8 @@ type RustfsUserRessourceModel struct {
 	AccessKey types.String `tfsdk:"access_key"`
 	SecretKey types.String `tfsdk:"secret_key"`
 	Status    types.String `tfsdk:"status"`
+	Policy    types.String `tfsdk:"policy"`
 	// ID        types.String `tfsdk:"id"`
-	// Group     types.String `tfsdk:"group"`
 	// Id        types.String `tfsdk:"id"`
 }
 
@@ -44,15 +44,6 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 		MarkdownDescription: "RustFS user",
 
 		Attributes: map[string]schema.Attribute{
-			// "last_updated": schema.StringAttribute{
-			// 	Computed: true,
-			// },
-			// "id": schema.StringAttribute{
-			// 	Computed: true,
-			// 	PlanModifiers: []planmodifier.String{
-			// 		stringplanmodifier.UseStateForUnknown(),
-			// 	},
-			// },
 			"access_key": schema.StringAttribute{
 				MarkdownDescription: "Access Key",
 				Required:            true,
@@ -66,17 +57,10 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 				MarkdownDescription: "Status",
 				Default:             stringdefault.StaticString("enabled"),
 			},
-			// "group": schema.StringAttribute{
-			// 	Optional:            true,
-			// 	MarkdownDescription: "User Group",
-			// },
-			// "id": schema.StringAttribute{
-			// 	Computed:            true,
-			// 	MarkdownDescription: "Example identifier",
-			// 	PlanModifiers: []planmodifier.String{
-			// 		stringplanmodifier.UseStateForUnknown(),
-			// 	},
-			// },
+			"policy": schema.StringAttribute{
+				Required:            true,
+				MarkdownDescription: "User policy",
+			},
 		},
 	}
 }
@@ -110,8 +94,7 @@ func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateReq
 	account := rustfs.UserAccount{
 		AccessKey: plan.AccessKey.ValueString(),
 		SecretKey: plan.SecretKey.ValueString(),
-		// Group:     data.Group.String(),
-		// Status: plan.Status.ValueString(),
+		Policy:    plan.Policy.ValueString(),
 	}
 
 	err := r.client.RustClient.CreateUserAccount(account)
@@ -152,6 +135,7 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 	state.Status = types.StringValue(read.Status)
 	state.AccessKey = types.StringValue(state.AccessKey.ValueString())
 	state.SecretKey = types.StringValue(state.SecretKey.ValueString())
+	state.Policy = types.StringValue(read.Policy)
 	// state.ID = types.StringValue(state.ID.ValueString())
 
 	// Save updated data into Terraform state

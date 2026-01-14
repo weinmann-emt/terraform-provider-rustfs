@@ -51,6 +51,7 @@ func TestAccOrderResource(t *testing.T) {
 resource "rustfs_user" "test" {
   access_key = "testuser"
   secret_key = "superSecret"
+	policy = "readonly"
 }
 `, Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("rustfs_user.test", "access_key", "testuser"),
