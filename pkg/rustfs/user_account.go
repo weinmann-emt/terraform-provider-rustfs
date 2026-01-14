@@ -10,16 +10,11 @@ type UserAccount struct {
 	SecretKey string `json:"secretKey"`
 	Status    string `json:"status"`
 	AccessKey string
-	policy    string
-	Group     string `json:"-"`
+	Policy    string   `json:"policyName"`
+	Groups    []string `json:"memberOf"`
 }
 
-type UserInfo struct {
-	Status string   `json:"status"`
-	Groups []string `json:"memberOf"`
-}
-
-func (c RustfsAdmin) CreateUserAccount(user UserAccount) error {
+func (c *RustfsAdmin) CreateUserAccount(user UserAccount) error {
 
 	user.Status = "enabled"
 	urlValues := make(url.Values)
@@ -42,14 +37,15 @@ func (c RustfsAdmin) CreateUserAccount(user UserAccount) error {
 	if err != nil {
 		return err
 	}
-	if user.Group != "" {
-		return c.addUserToGroup(user.AccessKey, user.Group)
+
+	if user.Policy != "" {
+		return c.addUserToGroup(user.AccessKey, user.Policy)
 	}
 	return err
 }
 
-func (c RustfsAdmin) ReadUserAccount(name string) (UserInfo, error) {
-	var instance UserInfo
+func (c *RustfsAdmin) ReadUserAccount(name string) (UserAccount, error) {
+	var instance UserAccount
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", name)
 	req_data := RequestData{
@@ -63,11 +59,12 @@ func (c RustfsAdmin) ReadUserAccount(name string) (UserInfo, error) {
 		return instance, err
 	}
 	err = json.NewDecoder(resp.Body).Decode(&instance)
+	instance.AccessKey = name
 	return instance, nil
 
 }
 
-func (c RustfsAdmin) UpdateUserAccount(account UserAccount) error {
+func (c *RustfsAdmin) UpdateUserAccount(account UserAccount) error {
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", account.AccessKey)
 	urlValues.Set("status", account.Status)
@@ -81,10 +78,13 @@ func (c RustfsAdmin) UpdateUserAccount(account UserAccount) error {
 	if err != nil {
 		return err
 	}
+	if account.Policy != "" {
+		return c.addUserToGroup(account.AccessKey, account.Policy)
+	}
 	return nil
 }
 
-func (c RustfsAdmin) DeleteUserAccount(account UserAccount) error {
+func (c *RustfsAdmin) DeleteUserAccount(account UserAccount) error {
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", account.AccessKey)
 	req_data := RequestData{
@@ -100,7 +100,7 @@ func (c RustfsAdmin) DeleteUserAccount(account UserAccount) error {
 	return err
 }
 
-func (c RustfsAdmin) addUserToGroup(user string, group string) error {
+func (c *RustfsAdmin) addUserToGroup(user string, group string) error {
 	urlValues := make(url.Values)
 	urlValues.Set("userOrGroup", user)
 	urlValues.Set("policyName", group)

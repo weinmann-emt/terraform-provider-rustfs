@@ -17,6 +17,11 @@ func TestCreateUserAccount(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
+	read, err := dut.ReadUserAccount(account.AccessKey)
+	if read.Status != "enabled" {
+		t.Error("wtf")
+	}
+
 	err = dut.DeleteUserAccount(account)
 	if err != nil {
 		t.Error(err)
@@ -28,7 +33,7 @@ func TestCreateUserAccountWithGrp(t *testing.T) {
 	account := rustfs.UserAccount{
 		AccessKey: randomString(8),
 		SecretKey: randomString(8),
-		Group:     "readwrite",
+		Policy:    "readwrite",
 	}
 	dut := getClient()
 	err := dut.CreateUserAccount(account)
