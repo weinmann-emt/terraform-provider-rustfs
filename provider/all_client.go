@@ -1,11 +1,11 @@
 package provider
 
 import (
-	"github.com/aminueza/terraform-provider-minio/minio"
+	"github.com/minio/minio-go/v7"
 	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
 type AllClient struct {
-	minio.S3MinioClient
+	Minio      *minio.Client
 	RustClient rustfs.RustfsAdmin
 }

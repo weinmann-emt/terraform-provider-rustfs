@@ -11,6 +11,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/minio/minio-go/v7"
+	"github.com/minio/minio-go/v7/pkg/credentials"
 	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
@@ -72,13 +74,29 @@ func (p *RustfsProvider) Configure(ctx context.Context, req provider.ConfigureRe
 		return
 	}
 
-	// Example client configuration for data sources and resources
-	// accessConfig, _ := generateMinioConfig(config)
-	// aclient, err := accessConfig.NewClient()
+	generatedConfig := generateRustClientConfig(config)
 
+	// Example client configuration for data sources and resources
+	tr, err := minio.DefaultTransport(config.Ssl.ValueBool())
+	if config.Insecure.ValueBool() {
+		tr.TLSClientConfig.InsecureSkipVerify = true
+	}
+	if err != nil {
+		resp.Diagnostics.AddError(err.Error(), err.Error())
+		return
+	}
+	minico_client, err := minio.New(config.Endpoint.ValueString(), &minio.Options{
+		Secure:    config.Ssl.ValueBool(),
+		Creds:     credentials.NewStaticV4(config.AccessKey.ValueString(), config.AccessSecret.ValueString(), ""),
+		Transport: tr,
+	})
+	if err != nil {
+		resp.Diagnostics.AddError(err.Error(), err.Error())
+		return
+	}
 	client := &AllClient{
-		// S3MinioClient: aclient,
-		RustClient: rustfs.New(generateRustClientConfig(config)),
+		Minio:      minico_client,
+		RustClient: rustfs.New(generatedConfig),
 	}
 
 	// if err != nil {
