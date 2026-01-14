@@ -78,6 +78,9 @@ func (c *RustfsAdmin) UpdateUserAccount(account UserAccount) error {
 	if err != nil {
 		return err
 	}
+	if account.Policy != "" {
+		return c.addUserToGroup(account.AccessKey, account.Policy)
+	}
 	return nil
 }
 
