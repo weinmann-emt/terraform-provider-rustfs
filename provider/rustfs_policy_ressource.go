@@ -209,8 +209,8 @@ func (r *PolicyRessource) Delete(ctx context.Context, req resource.DeleteRequest
 		return
 	}
 
-	// err := r.client.RustClient.DeletePolicy(data.Name.ValueString())
-	// if err != nil {
-	// 	tflog.Error(ctx, err.Error())
-	// }
+	err := r.client.RustClient.DeletePolicy(data.Name.ValueString())
+	if err != nil {
+		tflog.Error(ctx, err.Error())
+	}
 }

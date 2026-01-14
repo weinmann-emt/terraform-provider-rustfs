@@ -14,7 +14,7 @@ func TestAccPolicyResource(t *testing.T) {
 			{
 				Config: providerConfig + `
 resource "rustfs_policy" "test" {
-  name = "testpolicy"
+  name = "providerpolicy"
 	statement = [{
 				effect = "Allow"
 				action = ["s3:*"]
@@ -22,7 +22,7 @@ resource "rustfs_policy" "test" {
 	}]
 }
 `, Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("rustfs_policy.test", "name", "testpolicy"),
+					resource.TestCheckResourceAttr("rustfs_policy.test", "name", "providerpolicy"),
 				)},
 		}})
 }
