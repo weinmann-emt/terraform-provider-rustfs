@@ -48,7 +48,8 @@ func (r *PolicyRessource) Metadata(_ context.Context, req resource.MetadataReque
 // Schema defines the schema for the resource.
 func (r *PolicyRessource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Manage S3 policies",
+		Description:         "Manage S3 policies",
+		MarkdownDescription: "Manage S3 policies",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				Required:    true,

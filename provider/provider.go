@@ -43,7 +43,8 @@ func (p *RustfsProvider) Metadata(ctx context.Context, req provider.MetadataRequ
 
 func (p *RustfsProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
-		Description: "Interact with rustfs",
+		Description:         "Interact with rustfs",
+		MarkdownDescription: "Provider to access with RustFS",
 		Attributes: map[string]schema.Attribute{
 			"endpoint": schema.StringAttribute{
 				Required:    true,

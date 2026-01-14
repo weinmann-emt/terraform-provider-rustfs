@@ -42,6 +42,8 @@ func (r *ServiceAccountRessource) Metadata(_ context.Context, req resource.Metad
 // Schema defines the schema for the resource.
 func (r *ServiceAccountRessource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Manage ServiceUser/API Keys",
+		MarkdownDescription: "Manage ServiceUser/API Keys",
 		Attributes: map[string]schema.Attribute{
 			"access_key": schema.StringAttribute{
 				MarkdownDescription: "Access Key",
@@ -52,13 +54,16 @@ func (r *ServiceAccountRessource) Schema(_ context.Context, _ resource.SchemaReq
 				Required:            true,
 			},
 			"name": schema.StringAttribute{
-				Required: true,
+				Required:            true,
+				MarkdownDescription: "Visible name, only for viewing",
 			},
 			"description": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Short description of the scope we plan to use this token",
 			},
 			"user": schema.StringAttribute{
-				Optional: true,
+				Optional:            true,
+				MarkdownDescription: "Optional user the token should be scoped to",
 			},
 		},
 	}
