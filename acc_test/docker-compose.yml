@@ -1,0 +1,26 @@
+services:
+  acceptance:
+    image: golang:1.25
+    volumes:
+      - ..:/workspaces/terraform-provider-rustfs
+    working_dir: /workspaces/terraform-provider-rustfs
+    command: bash -c "\
+      ls && \
+      cp .terraformrc ~/.terraformrc && \
+      go mod tidy && \
+      go build -buildvcs=false && \
+      TF_ACC=1 go test ./provider/
+      "
+    depends_on:
+      rustfs:
+        condition: service_started
+
+  rustfs:
+    image: rustfs/rustfs:latest
+    # ports:
+    #   - "9000:9000"
+    #   - "9001:9001"
+    environment:
+      RUSTFS_ACCESS_KEY: rustfsadmin
+      RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_CONSOLE_ENABLE: true
