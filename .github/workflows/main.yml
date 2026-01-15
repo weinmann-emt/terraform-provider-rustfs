@@ -27,4 +27,4 @@ jobs:
       #   with:
       #     args: ./...
       - name: Run tests
-        run: docker compose run --rm test
+        run: docker compose run --rm acceptance
