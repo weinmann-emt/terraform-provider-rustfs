@@ -27,4 +27,4 @@ jobs:
       #   with:
       #     args: ./...
       - name: Run tests
-        run: docker-compose -f acc_test/docker-compose.yml run acceptance
+        run: docker compose -f acc_test/docker-compose.yml run acceptance
