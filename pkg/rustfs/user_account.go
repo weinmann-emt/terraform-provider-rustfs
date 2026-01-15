@@ -32,7 +32,8 @@ func (c *RustfsAdmin) CreateUserAccount(user UserAccount) error {
 		QueryValues: urlValues,
 	}
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	_, err = c.doRequest(ctx, req_data)
 	if err != nil {
 		return err
@@ -53,7 +54,8 @@ func (c *RustfsAdmin) ReadUserAccount(name string) (UserAccount, error) {
 		RelPath:     "user-info",
 		QueryValues: urlValues,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	resp, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return instance, err
@@ -73,7 +75,8 @@ func (c *RustfsAdmin) UpdateUserAccount(account UserAccount) error {
 		RelPath:     "user-info",
 		QueryValues: urlValues,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	_, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return err
@@ -92,7 +95,8 @@ func (c *RustfsAdmin) DeleteUserAccount(account UserAccount) error {
 		RelPath:     "remove-user",
 		QueryValues: urlValues,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	_, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return err
@@ -110,7 +114,8 @@ func (c *RustfsAdmin) addUserToGroup(user string, group string) error {
 		RelPath:     "set-user-or-group-policy",
 		QueryValues: urlValues,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	_, err := c.doRequest(ctx, req_data)
 	return err
 }

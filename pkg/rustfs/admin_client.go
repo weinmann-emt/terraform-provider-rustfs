@@ -58,8 +58,8 @@ func (c *RustfsAdmin) IsAdmin() (bool, error) {
 		RelPath: "is-admin",
 		Method:  "GET",
 	}
-	ctx, _ := context.WithCancel(context.Background())
-
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	resp, err := c.doRequest(ctx, data)
 	if err != nil {
 		return false, err

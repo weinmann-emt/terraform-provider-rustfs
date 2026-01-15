@@ -54,7 +54,8 @@ func (c *RustfsAdmin) CreatePolicy(policy Policy) error {
 		Content:     bytes,
 		QueryValues: urlValues,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	_, err = c.doRequest(ctx, req_data)
 	if err != nil {
 		return err
@@ -75,7 +76,8 @@ func (c *RustfsAdmin) ReadPolicy(policy string) (Policy, error) {
 		QueryValues: urlValues,
 	}
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	resp, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return Policy{}, err
@@ -123,7 +125,8 @@ func (c *RustfsAdmin) DeletePolicy(policy string) error {
 		QueryValues: urlValues,
 	}
 
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	_, err := c.doRequest(ctx, req_data)
 	return err
 
