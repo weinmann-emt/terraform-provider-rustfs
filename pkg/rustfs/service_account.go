@@ -47,7 +47,8 @@ func (c *RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
 		RelPath: "add-service-accounts",
 		Content: bytes,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	resp, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return err
@@ -66,7 +67,8 @@ func (c *RustfsAdmin) ReadServiceAccount(name string) (ServiceAccount, error) {
 		RelPath:     "info-service-account",
 		QueryValues: urlValues,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	resp, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return instance, err
@@ -90,7 +92,8 @@ func (c *RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
 		QueryValues: urlValues,
 		Content:     bytes,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	_, err = c.doRequest(ctx, req_data)
 	if err != nil {
 		return err
@@ -107,7 +110,8 @@ func (c *RustfsAdmin) DeleteServiceAccount(account ServiceAccount) error {
 		RelPath:     "delete-service-accounts",
 		QueryValues: urlValues,
 	}
-	ctx, _ := context.WithCancel(context.Background())
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 	_, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return err

@@ -41,8 +41,8 @@ func (r *RustfsUserRessource) Metadata(ctx context.Context, req resource.Metadat
 func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
-		MarkdownDescription: "RustFS user",
-
+		MarkdownDescription: "Manage RustFS user",
+		Description:         "Manage RustFS user",
 		Attributes: map[string]schema.Attribute{
 			"access_key": schema.StringAttribute{
 				MarkdownDescription: "Access Key",

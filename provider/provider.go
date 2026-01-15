@@ -43,23 +43,29 @@ func (p *RustfsProvider) Metadata(ctx context.Context, req provider.MetadataRequ
 
 func (p *RustfsProvider) Schema(ctx context.Context, req provider.SchemaRequest, resp *provider.SchemaResponse) {
 	resp.Schema = schema.Schema{
+		Description:         "Interact with rustfs",
+		MarkdownDescription: "Provider to access with RustFS",
 		Attributes: map[string]schema.Attribute{
 			"endpoint": schema.StringAttribute{
 				Required:    true,
-				Description: "MinIO server endpoint in the format host:port",
+				Description: "RUSTFS server endpoint in the format host:port",
 			},
 			"access_key": schema.StringAttribute{
-				Required: true,
+				Required:    true,
+				Description: "Username or access key",
 			},
 			"access_secret": schema.StringAttribute{
-				Required:  true,
-				Sensitive: true,
+				Required:    true,
+				Sensitive:   true,
+				Description: "Secret to be used as pass",
 			},
 			"insecure": schema.BoolAttribute{
-				Optional: true,
+				Optional:    true,
+				Description: "Insecure skip SSL validation",
 			},
 			"ssl": schema.BoolAttribute{
-				Optional: true,
+				Optional:    true,
+				Description: "Use SSL transport",
 			},
 		},
 	}

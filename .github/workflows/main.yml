@@ -1,0 +1,30 @@
+name: Terraform Provider CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+jobs:
+  checkup:
+    name: Checkup
+    runs-on: ubuntu-latest
+    env:
+      GOARCH: amd64
+      GOOS: linux
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version-file: "go.mod"
+      - name: Run fmt
+        run: go fmt ./...
+      - name: Run vet
+        run: go vet ./...
+      # - name: Run Gosec Security Scanner
+      #   uses: securego/gosec@master
+      #   with:
+      #     args: ./...
+      - name: Run tests
+        run: docker compose -f acc_test/docker-compose.yml run acceptance
