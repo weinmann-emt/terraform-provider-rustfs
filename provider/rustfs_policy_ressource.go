@@ -66,11 +66,11 @@ func (r *PolicyRessource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						"effect": schema.StringAttribute{
 							Required: true,
 						},
-						"action": schema.ListAttribute{
+						"action": schema.SetAttribute{
 							ElementType: types.StringType,
 							Required:    true,
 						},
-						"ressource": schema.ListAttribute{
+						"ressource": schema.SetAttribute{
 							ElementType: types.StringType,
 							Required:    true,
 						},
