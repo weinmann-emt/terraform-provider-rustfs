@@ -18,9 +18,9 @@ func TestCreateAndDeletePolicy(t *testing.T) {
 	name := "test"
 	statements := []rustfs.PolicyStatement{
 		{
-			Effect:    "Allow",
-			Action:    actions[:],
-			Ressource: resources[:],
+			Effect:   "Allow",
+			Action:   actions[:],
+			Resource: resources[:],
 		},
 	}
 	policy := rustfs.Policy{
