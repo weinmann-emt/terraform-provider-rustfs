@@ -114,9 +114,9 @@ func (r *PolicyRessource) Create(ctx context.Context, req resource.CreateRequest
 	for _, i := range plan.Statement {
 		statements = append(statements,
 			rustfs.PolicyStatement{
-				Effect:    i.Effect,
-				Action:    i.Action,
-				Ressource: i.Ressource,
+				Effect:   i.Effect,
+				Action:   i.Action,
+				Resource: i.Ressource,
 			},
 		)
 	}
@@ -172,7 +172,7 @@ func (r *PolicyRessource) Read(ctx context.Context, req resource.ReadRequest, re
 			policyStatementModel{
 				Effect:    read_statement.Effect,
 				Action:    read_statement.Action,
-				Ressource: read_statement.Ressource,
+				Ressource: read_statement.Resource,
 			},
 		)
 	}

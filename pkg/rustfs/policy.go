@@ -9,15 +9,15 @@ import (
 )
 
 type PolicyStatement struct {
-	Effect    string   `json:"Effect"`
-	Action    []string `json:"Action"`
-	Ressource []string `json:"Resource"`
+	Effect   string   `json:"Effect"`
+	Action   []string `json:"Action"`
+	Resource []string `json:"Resource"`
 }
 
 type PolicyStatementSinle struct {
-	Effect    string   `json:"Effect"`
-	Action    string   `json:"Action"`
-	Ressource []string `json:"Resource"`
+	Effect   string   `json:"Effect"`
+	Action   string   `json:"Action"`
+	Resource []string `json:"Resource"`
 }
 
 type Policy struct {
@@ -101,9 +101,9 @@ func (c *RustfsAdmin) ReadPolicy(policy string) (Policy, error) {
 		for _, got := range statement_single.Statement {
 			statements = append(statements,
 				PolicyStatement{
-					Effect:    got.Effect,
-					Action:    []string{got.Action},
-					Ressource: got.Ressource,
+					Effect:   got.Effect,
+					Action:   []string{got.Action},
+					Resource: got.Resource,
 				},
 			)
 		}
