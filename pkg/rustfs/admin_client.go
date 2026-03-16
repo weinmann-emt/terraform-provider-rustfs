@@ -127,3 +127,32 @@ func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*
 	req = signer.SignV4(*req, c.accessKey, c.accessSecret, "", "us-east-01")
 	return req, nil
 }
+
+func (c *RustfsAdmin) DoDirectRequest (ctx context.Context,  request RequestData)(res *http.Response, err error){
+	urlStr := strings.Replace(c.endpointURL, "/rustfs/admin/"+ rustfsApiVersion, "", 1) + "/" + request.RelPath
+	// If there are any query values, add them to the end.
+	if len(request.QueryValues) > 0 {
+		urlStr = urlStr + "?" + s3utils.QueryEncode(request.QueryValues)
+	}
+
+	req, err := http.NewRequestWithContext(ctx, request.Method, urlStr, bytes.NewReader(request.Content))
+	if err != nil {
+		return nil, err
+	}
+	if length := len(request.Content); length > 0 {
+		req.ContentLength = int64(length)
+	}
+	sum := sha256.Sum256(request.Content)
+	req.Header.Set("X-Amz-Content-Sha256", hex.EncodeToString(sum[:]))
+
+	// sign using minio go (too stupid to get it done self)
+	req = signer.SignV4(*req, c.accessKey, c.accessSecret, "", "us-east-01")
+
+	res, err = c.httpClient.Do(req)
+	if res.StatusCode != 200 {
+		body, _ := io.ReadAll(res.Body)
+		return res, errors.New(string(body))
+	}
+
+	return
+}
