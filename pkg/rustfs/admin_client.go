@@ -80,7 +80,7 @@ func (c *RustfsAdmin) doRequest(ctx context.Context, reqData RequestData) (res *
 	}
 
 	res, err = c.httpClient.Do(req)
-	if res.StatusCode != 200 {
+	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return res, errors.New(string(body))
 	}
