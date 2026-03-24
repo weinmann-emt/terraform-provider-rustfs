@@ -47,10 +47,10 @@ func TestCRDQuota(t *testing.T){
 		t.Error("Readback gave wring quota")
 	}
 
-	// err = dut.DeletQuota(name)
-	// if err != nil {
-	// 	t.Error("error during quota remove")
-	// }
+	err = dut.DeletQuota(name)
+	if err != nil {
+		t.Error("error during quota remove")
+	}
 
 
 }
