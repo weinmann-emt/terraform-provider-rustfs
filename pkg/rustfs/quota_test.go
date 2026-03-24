@@ -26,19 +26,19 @@ func TestReadQuota(t *testing.T) {
 
 func TestCRDQuota(t *testing.T){
 	name :=  randomString(8)
+	name = strings.ToLower(name)
 	quota := rustfs.Quota{
 		Bucket: name,
 		Quota: 100054541,
 	}
 	dut := getClient()
-	name = strings.ToLower(name)
 	dut.CreateBucket(name)
 	resp, err := dut.ReadQuota(name)
 	if resp.Bucket != name {
 		t.Error("Bucket readback unexpected value")
 	}
 	time.Sleep(5)
-	_, err = dut.SetQuota(quota)
+	resp, err = dut.SetQuota(quota)
 	if err != nil {
 		t.Error(err)
 	}
