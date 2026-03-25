@@ -48,7 +48,7 @@ func (r *quotaRessource) Schema(_ context.Context, _ resource.SchemaRequest, res
 			},
 			"quota": schema.Int64Attribute{
 				Required:    true,
-				Description: "Bytes of the qupta",
+				Description: "Bytes of the quota",
 			},
 		},
 	}
