@@ -28,8 +28,7 @@ type quotaRessource struct {
 
 type quotaRessourceModel struct {
 	Bucket types.String `tfsdk:"bucket"`
-	Quota types.Int32 `tfsdk:"quota"`
-
+	Quota  types.Int64  `tfsdk:"quota"`
 }
 
 // Metadata returns the resource type name.
@@ -47,8 +46,8 @@ func (r *quotaRessource) Schema(_ context.Context, _ resource.SchemaRequest, res
 				Required:    true,
 				Description: "Name of the bucket",
 			},
-			"quota": schema.Int32Attribute{
-				Required: true,
+			"quota": schema.Int64Attribute{
+				Required:    true,
 				Description: "Bytes of the qupta",
 			},
 		},
@@ -80,7 +79,7 @@ func (r *quotaRessource) Create(ctx context.Context, req resource.CreateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	quota := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt32()), Quota_Type: "HARD"}
+	quota := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
 	quota, err := r.client.RustClient.SetQuota(quota)
 	if err != nil {
 		resp.Diagnostics.AddError(
@@ -110,7 +109,7 @@ func (r *quotaRessource) Read(ctx context.Context, req resource.ReadRequest, res
 	// Read
 	read, _ := r.client.RustClient.ReadQuota(state.Bucket.ValueString())
 	// Save update status
-	state.Quota = types.Int32Value(int32(read.Quota))
+	state.Quota = types.Int64Value(int64(read.Quota))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 	diags = resp.State.Set(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -127,10 +126,10 @@ func (r *quotaRessource) Update(ctx context.Context, req resource.UpdateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	
-	quota := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt32()), Quota_Type: "HARD"}
+
+	quota := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
 	read, _ := r.client.RustClient.SetQuota(quota)
-	plan.Quota = types.Int32Value(int32(read.Quota))
+	plan.Quota = types.Int64Value(int64(read.Quota))
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
