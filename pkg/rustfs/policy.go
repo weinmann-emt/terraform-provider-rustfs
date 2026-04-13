@@ -35,8 +35,8 @@ type statementReplySingle struct {
 }
 
 type policyReply struct {
-	PolicyName string `json:"policy_name"`
-	Policy     string `json:"policy"`
+	PolicyName string          `json:"policy_name"`
+	Policy     json.RawMessage `json:"policy"`
 }
 
 func (c *RustfsAdmin) CreatePolicy(policy Policy) error {
@@ -89,13 +89,25 @@ func (c *RustfsAdmin) ReadPolicy(policy string) (Policy, error) {
 	}
 	read.Name = instance.PolicyName
 	read.Version = "2012-10-17"
-	err = json.NewDecoder(strings.NewReader(instance.Policy)).Decode(&statement)
+
+	// The rustfs API may return `policy` either as a JSON string containing
+	// the policy document, or as an inline JSON object. Normalize to bytes.
+	policyBytes := []byte(instance.Policy)
+	if len(policyBytes) > 0 && policyBytes[0] == '"' {
+		var asString string
+		if err := json.Unmarshal(policyBytes, &asString); err != nil {
+			return Policy{}, err
+		}
+		policyBytes = []byte(asString)
+	}
+
+	err = json.NewDecoder(strings.NewReader(string(policyBytes))).Decode(&statement)
 	// We have no error!
 	if err == nil {
 		read.Statement = statement.Statement
 		return read, nil
 	}
-	err_single := json.NewDecoder(strings.NewReader(instance.Policy)).Decode(&statement_single)
+	err_single := json.NewDecoder(strings.NewReader(string(policyBytes))).Decode(&statement_single)
 	if err_single == nil {
 		statements := []PolicyStatement{}
 		for _, got := range statement_single.Statement {
