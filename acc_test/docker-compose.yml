@@ -1,6 +1,6 @@
 services:
   acceptance:
-    image: golang:1.25
+    image: golang:1.26
     volumes:
       - ..:/workspaces/terraform-provider-rustfs
     working_dir: /workspaces/terraform-provider-rustfs
@@ -9,7 +9,8 @@ services:
       cp .terraformrc ~/.terraformrc && \
       go mod tidy && \
       go build -buildvcs=false && \
-      TF_ACC=1 go test ./provider/
+      TF_ACC=1 go test ./provider/ && \
+      echo something
       "
     depends_on:
       rustfs:
