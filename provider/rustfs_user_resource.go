@@ -7,7 +7,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
@@ -59,7 +61,10 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 			},
 			"policy": schema.StringAttribute{
 				Required:            true,
-				MarkdownDescription: "User policy",
+				MarkdownDescription: "User policy. Changing this forces a new user to be created (the underlying API does not support updating a user's policy in-place).",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 		},
 	}
@@ -154,12 +159,26 @@ func (r *RustfsUserRessource) Update(ctx context.Context, req resource.UpdateReq
 		return
 	}
 
+	account := rustfs.UserAccount{
+		AccessKey: plan.AccessKey.ValueString(),
+		SecretKey: plan.SecretKey.ValueString(),
+		Policy:    plan.Policy.ValueString(),
+	}
+
+	err := r.client.RustClient.UpdateUserAccount(account)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error updating user",
+			"Could not update user, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 }
 
 func (r *RustfsUserRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
@@ -176,7 +195,11 @@ func (r *RustfsUserRessource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 	err := r.client.RustClient.DeleteUserAccount(account)
 	if err != nil {
-		tflog.Error(ctx, err.Error())
+		resp.Diagnostics.AddError(
+			"Error deleting user",
+			"Could not delete user, unexpected error: "+err.Error(),
+		)
+		return
 	}
 }
 

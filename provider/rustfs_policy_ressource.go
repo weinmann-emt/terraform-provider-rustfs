@@ -194,6 +194,30 @@ func (r *PolicyRessource) Update(ctx context.Context, req resource.UpdateRequest
 		return
 	}
 
+	statements := []rustfs.PolicyStatement{}
+	for _, i := range plan.Statement {
+		statements = append(statements,
+			rustfs.PolicyStatement{
+				Effect:   i.Effect,
+				Action:   i.Action,
+				Resource: i.Ressource,
+			},
+		)
+	}
+	policy := rustfs.Policy{
+		Version:   plan.Version.ValueString(),
+		Name:      plan.Name.ValueString(),
+		Statement: statements,
+	}
+	err := r.client.RustClient.CreatePolicy(policy)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error updating policy",
+			"Could not update policy, unexpected error: "+err.Error(),
+		)
+		return
+	}
+
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -214,6 +238,10 @@ func (r *PolicyRessource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	err := r.client.RustClient.DeletePolicy(data.Name.ValueString())
 	if err != nil {
-		tflog.Error(ctx, err.Error())
+		resp.Diagnostics.AddError(
+			"Error deleting policy",
+			"Could not delete policy, unexpected error: "+err.Error(),
+		)
+		return
 	}
 }
