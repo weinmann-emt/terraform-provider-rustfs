@@ -39,11 +39,20 @@ type policyReply struct {
 	Policy     json.RawMessage `json:"policy"`
 }
 
+type policyPost struct {
+	Version   string            `json:"Version"`
+	Statement []PolicyStatement `json:"Statement"`
+}
+
 func (c *RustfsAdmin) CreatePolicy(policy Policy) error {
 	urlValues := make(url.Values)
 	urlValues.Set("name", policy.Name)
 	policy.Version = "2012-10-17" // only this is working
-	bytes, err := json.Marshal(policy)
+	post := policyPost{
+		Version:   policy.Version,
+		Statement: policy.Statement,
+	}
+	bytes, err := json.Marshal(post)
 	if err != nil {
 		return err
 	}
