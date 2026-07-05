@@ -149,7 +149,7 @@ func (c *RustfsAdmin) DoDirectRequest (ctx context.Context,  request RequestData
 	req = signer.SignV4(*req, c.accessKey, c.accessSecret, "", "us-east-01")
 
 	res, err = c.httpClient.Do(req)
-	if res.StatusCode != 200 {
+	if res.StatusCode != 200 && res.StatusCode != 204 {
 		body, _ := io.ReadAll(res.Body)
 		return res, errors.New(string(body))
 	}
