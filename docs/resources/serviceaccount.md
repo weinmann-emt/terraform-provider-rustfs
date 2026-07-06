@@ -25,3 +25,11 @@ Manage ServiceUser/API Keys
 
 - `description` (String) Short description of the scope we plan to use this token
 - `user` (String) Optional user the token should be scoped to
+
+## Import
+
+Import is supported using the access key:
+
+```
+terraform import rustfs_serviceaccount.my_sa my-access-key
+```
