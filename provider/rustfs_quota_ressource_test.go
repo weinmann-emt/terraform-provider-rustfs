@@ -23,7 +23,7 @@ resource "rustfs_quota" "test" {
 }
 `, Check: resource.ComposeAggregateTestCheckFunc(
 					resource.TestCheckResourceAttr("rustfs_bucket.test2", "name", "somebucket2"),
-					resource.TestCheckResourceAttr("rustfs_quota.test", "quota","100000"),
+					resource.TestCheckResourceAttr("rustfs_quota.test", "quota", "100000"),
 				)},
 		}})
 }
