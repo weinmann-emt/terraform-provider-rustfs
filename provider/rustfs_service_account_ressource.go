@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -21,7 +22,8 @@ type serviceAccountResourceModel struct {
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource = &ServiceAccountRessource{}
+	_ resource.Resource                = &ServiceAccountRessource{}
+	_ resource.ResourceWithImportState = &ServiceAccountRessource{}
 )
 
 // NewServiceAccountRessource is a helper function to simplify the provider implementation.
@@ -206,4 +208,8 @@ func (r *ServiceAccountRessource) Delete(ctx context.Context, req resource.Delet
 	if err != nil {
 		tflog.Error(ctx, err.Error())
 	}
+}
+
+func (r *ServiceAccountRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("access_key"), req, resp)
 }

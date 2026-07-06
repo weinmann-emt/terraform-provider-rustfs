@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,8 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource = &bucketRessource{}
+	_ resource.Resource                = &bucketRessource{}
+	_ resource.ResourceWithImportState = &bucketRessource{}
 )
 
 // NewbucketRessource is a helper function to simplify the provider implementation.
@@ -159,4 +161,8 @@ func (r *bucketRessource) Delete(ctx context.Context, req resource.DeleteRequest
 	if err != nil {
 		tflog.Error(ctx, err.Error())
 	}
+}
+
+func (r *bucketRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }
