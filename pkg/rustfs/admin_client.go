@@ -131,8 +131,8 @@ func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*
 	return req, nil
 }
 
-func (c *RustfsAdmin) DoDirectRequest (ctx context.Context,  request RequestData)(res *http.Response, err error){
-	urlStr := strings.Replace(c.endpointURL, "/rustfs/admin/"+ rustfsApiVersion, "", 1) + "/" + request.RelPath
+func (c *RustfsAdmin) DoDirectRequest(ctx context.Context, request RequestData) (res *http.Response, err error) {
+	urlStr := strings.Replace(c.endpointURL, "/rustfs/admin/"+rustfsApiVersion, "", 1) + "/" + request.RelPath
 	// If there are any query values, add them to the end.
 	if len(request.QueryValues) > 0 {
 		urlStr = urlStr + "?" + s3utils.QueryEncode(request.QueryValues)
