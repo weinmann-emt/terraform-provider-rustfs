@@ -9,12 +9,11 @@ type Bucket struct {
 	Name string
 }
 
-
-func (c *RustfsAdmin) CreateBucket(bucket string)(err error){
+func (c *RustfsAdmin) CreateBucket(bucket string) (err error) {
 	bucket = strings.ToLower(bucket)
 	req_data := RequestData{
-		Method:      "PUT",
-		RelPath:     bucket,
+		Method:  "PUT",
+		RelPath: bucket,
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -25,11 +24,11 @@ func (c *RustfsAdmin) CreateBucket(bucket string)(err error){
 	return nil
 }
 
-func (c *RustfsAdmin) DeleteBucket(bucket string)(err error){
+func (c *RustfsAdmin) DeleteBucket(bucket string) (err error) {
 	bucket = strings.ToLower(bucket)
 	req_data := RequestData{
-		Method:      "DELETE",
-		RelPath:     bucket,
+		Method:  "DELETE",
+		RelPath: bucket,
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
