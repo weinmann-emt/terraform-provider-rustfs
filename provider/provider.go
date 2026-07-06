@@ -47,17 +47,17 @@ func (p *RustfsProvider) Schema(ctx context.Context, req provider.SchemaRequest,
 		MarkdownDescription: "Provider to access with RustFS",
 		Attributes: map[string]schema.Attribute{
 			"endpoint": schema.StringAttribute{
-				Required:    true,
-				Description: "RUSTFS server endpoint in the format host:port",
+				Optional:    true,
+				Description: "RUSTFS server endpoint in the format host:port. Defaults to RUSTFS_ENDPOINT environment variable.",
 			},
 			"access_key": schema.StringAttribute{
-				Required:    true,
-				Description: "Username or access key",
+				Optional:    true,
+				Description: "Username or access key. Defaults to RUSTFS_USER environment variable.",
 			},
 			"access_secret": schema.StringAttribute{
-				Required:    true,
+				Optional:    true,
 				Sensitive:   true,
-				Description: "Secret to be used as pass",
+				Description: "Secret to be used as pass. Defaults to RUSTFS_SECRET environment variable.",
 			},
 			"insecure": schema.BoolAttribute{
 				Optional:    true,
@@ -82,19 +82,30 @@ func (p *RustfsProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	generatedConfig := generateRustClientConfig(config)
 
+	endpoint := envOrDefault("RUSTFS_ENDPOINT", config.Endpoint.ValueString())
+	if endpoint == "" {
+		resp.Diagnostics.AddError(
+			"Missing RUSTFS endpoint",
+			"Set the endpoint in the provider block or via the RUSTFS_ENDPOINT environment variable.",
+		)
+		return
+	}
+
+	accessKey := envOrDefault("RUSTFS_USER", config.AccessKey.ValueString())
+	secretKey := envOrDefault("RUSTFS_SECRET", config.AccessSecret.ValueString())
+
+	// Example client configuration for data sources and resources
 	tr, err := minio.DefaultTransport(config.Ssl.ValueBool())
 	if err != nil {
 		resp.Diagnostics.AddError(err.Error(), err.Error())
 		return
 	}
-	if config.Insecure.ValueBool() {
-		tr.TLSClientConfig.InsecureSkipVerify = true
-	}
-	minio_client, err := minio.New(config.Endpoint.ValueString(), &minio.Options{
+	usEast01 := "us-east-1"
+	minio_client, err := minio.New(endpoint, &minio.Options{
 		Secure:    config.Ssl.ValueBool(),
-		Creds:     credentials.NewStaticV4(config.AccessKey.ValueString(), config.AccessSecret.ValueString(), ""),
+		Creds:     credentials.NewStaticV4(accessKey, secretKey, ""),
 		Transport: tr,
-		Region:    "us-east-1",
+		Region:    usEast01,
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(err.Error(), err.Error())
