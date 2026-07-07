@@ -121,8 +121,6 @@ func (r *bucketRessource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 	// Save update status
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -157,6 +155,9 @@ func (r *bucketRessource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	err := r.client.Minio.RemoveBucket(ctx, data.Name.ValueString())
 	if err != nil {
-		tflog.Error(ctx, err.Error())
+		resp.Diagnostics.AddError(
+			"Error deleting bucket",
+			"Could not delete bucket, unexpected error: "+err.Error(),
+		)
 	}
 }
