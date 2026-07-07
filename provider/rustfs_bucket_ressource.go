@@ -92,7 +92,7 @@ func (r *bucketRessource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	err = r.client.Minio.MakeBucket(ctx, plan.Name.ValueString(), minio.MakeBucketOptions{
-		Region: "us-east-01",
+		Region: "us-east-1",
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(
