@@ -1,6 +1,6 @@
 services:
   acceptance:
-    image: golang:1.26
+    image: golang:1.23
     volumes:
       - ..:/workspaces/terraform-provider-rustfs
     working_dir: /workspaces/terraform-provider-rustfs
