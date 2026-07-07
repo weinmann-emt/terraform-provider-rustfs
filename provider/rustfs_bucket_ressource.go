@@ -109,7 +109,6 @@ func (r *bucketRessource) Create(ctx context.Context, req resource.CreateRequest
 		return
 	}
 	tflog.Trace(ctx, "created a resource")
-	// plan.ID = types.StringValue(account.AccessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 

@@ -11,7 +11,7 @@ import (
 
 func getClient() rustfs.RustfsAdmin {
 	endpoint := os.Getenv("RUSTFS_ENDPOINT")
-	key := os.Getenv("RUSTFS_KEY")
+	key := os.Getenv("RUSTFS_USER")
 	secret := os.Getenv("RUSTFS_SECRET")
 
 	config := rustfs.RustfsAdminConfig{
@@ -26,7 +26,11 @@ func getClient() rustfs.RustfsAdmin {
 	return dut
 }
 
+<<<<<<< HEAD
 func randomString() string {
+=======
+func randomString(length int) string {
+>>>>>>> cc5174d (fix: check quota API errors, remove debug print, remove dead code, fix test env var and rand.Seed (#38))
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"

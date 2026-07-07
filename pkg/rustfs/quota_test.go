@@ -38,12 +38,17 @@ func TestCRDQuota(t *testing.T) {
 	if err := dut.CreateBucket(name); err != nil {
 		t.Fatal(err)
 	}
+<<<<<<< HEAD
 	_, err := dut.ReadQuota(name)
 	if err != nil {
 		t.Fatal(err)
 	}
 	time.Sleep(5 * time.Second)
 	resp, err := dut.SetQuota(quota)
+=======
+	time.Sleep(5 * time.Second)
+	resp, err = dut.SetQuota(quota)
+>>>>>>> cc5174d (fix: check quota API errors, remove debug print, remove dead code, fix test env var and rand.Seed (#38))
 	if err != nil {
 		t.Error(err)
 	}
