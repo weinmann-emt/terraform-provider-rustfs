@@ -8,7 +8,6 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
-	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -49,18 +48,24 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 			"access_key": schema.StringAttribute{
 				MarkdownDescription: "Access Key",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"secret_key": schema.StringAttribute{
 				MarkdownDescription: "Secret Key",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"status": schema.StringAttribute{
+				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Status",
-				Default:             stringdefault.StaticString("enabled"),
+				MarkdownDescription: "User status (enabled/disabled). Defaults to enabled.",
 			},
 			"policy": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "User policy. Changing this forces a new user to be created (the underlying API does not support updating a user's policy in-place).",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
