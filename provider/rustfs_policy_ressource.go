@@ -88,7 +88,7 @@ func (r *PolicyRessource) Configure(_ context.Context, req resource.ConfigureReq
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -129,7 +129,7 @@ func (r *PolicyRessource) Create(ctx context.Context, req resource.CreateRequest
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating policy",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Could not create policy, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -159,7 +159,7 @@ func (r *PolicyRessource) Read(ctx context.Context, req resource.ReadRequest, re
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading policy",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Could not read policy, unexpected error: "+err.Error(),
 		)
 		return
 	}
