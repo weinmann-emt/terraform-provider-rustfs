@@ -23,18 +23,18 @@ func (c *RustfsAdmin) ReadQuota(bucket string) (quota Quota, err error) {
 		return quota, err
 	}
 	err = json.NewDecoder(resp.Body).Decode(&quota)
-	return quota, nil
+	return quota, err
 }
 
-func (c *RustfsAdmin) SetQuota(new Quota) (quota Quota, err error) {
-	new.Quota_Type = "HARD"
-	bytes, err := json.Marshal(new)
+func (c *RustfsAdmin) SetQuota(q Quota) (quota Quota, err error) {
+	q.Quota_Type = "HARD"
+	bytes, err := json.Marshal(q)
 	if err != nil {
 		return Quota{}, err
 	}
 	req_data := RequestData{
 		Method:  "PUT",
-		RelPath: "quota/" + new.Bucket,
+		RelPath: "quota/" + q.Bucket,
 		Content: bytes,
 	}
 	ctx, cancel := context.WithCancel(context.Background())
@@ -45,10 +45,7 @@ func (c *RustfsAdmin) SetQuota(new Quota) (quota Quota, err error) {
 	}
 	defer resp.Body.Close()
 	err = json.NewDecoder(resp.Body).Decode(&quota)
-	if err != nil {
-		return Quota{}, err
-	}
-	return quota, nil
+	return quota, err
 }
 
 func (c *RustfsAdmin) DeletQuota(bucket string) (err error) {

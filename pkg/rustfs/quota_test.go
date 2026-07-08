@@ -9,10 +9,12 @@ import (
 )
 
 func TestReadQuota(t *testing.T) {
-	name := randomString(8)
+	name := randomString()
 	dut := getClient()
 	name = strings.ToLower(name)
-	dut.CreateBucket(name)
+	if err := dut.CreateBucket(name); err != nil {
+		t.Fatal(err)
+	}
 	resp, err := dut.ReadQuota(name)
 	if err != nil {
 		t.Error(err)
@@ -20,35 +22,40 @@ func TestReadQuota(t *testing.T) {
 	if resp.Bucket != name {
 		t.Error("Bucket readback unexpected value")
 	}
-	dut.DeleteBucket(name)
+	if err := dut.DeleteBucket(name); err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestCRDQuota(t *testing.T) {
-	name := randomString(8)
+	name := randomString()
 	name = strings.ToLower(name)
 	quota := rustfs.Quota{
 		Bucket: name,
 		Quota:  100054541,
 	}
 	dut := getClient()
-	dut.CreateBucket(name)
-	resp, err := dut.ReadQuota(name)
-	if resp.Bucket != name {
-		t.Error("Bucket readback unexpected value")
+	if err := dut.CreateBucket(name); err != nil {
+		t.Fatal(err)
 	}
-	time.Sleep(5)
-	resp, err = dut.SetQuota(quota)
+	_, err := dut.ReadQuota(name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	time.Sleep(5 * time.Second)
+	resp, err := dut.SetQuota(quota)
 	if err != nil {
 		t.Error(err)
 	}
 	resp, err = dut.ReadQuota(name)
+	if err != nil {
+		t.Error(err)
+	}
 	if resp.Quota != quota.Quota {
-		t.Error("Readback gave wring quota")
+		t.Error("Readback gave wrong quota")
 	}
 
-	err = dut.DeletQuota(name)
-	if err != nil {
+	if err := dut.DeletQuota(name); err != nil {
 		t.Error("error during quota remove")
 	}
-
 }

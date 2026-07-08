@@ -38,6 +38,7 @@ type ServiceAccountReply struct {
 
 func (c *RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
 	normalizeServiceAccount(&account)
+	//#nosec G117 — AccessKey is a public identifier, not a secret
 	bytes, err := json.Marshal(account)
 	if err != nil {
 		return err
@@ -74,7 +75,7 @@ func (c *RustfsAdmin) ReadServiceAccount(name string) (ServiceAccount, error) {
 		return instance, err
 	}
 	err = json.NewDecoder(resp.Body).Decode(&instance)
-	return instance, nil
+	return instance, err
 }
 
 func (c *RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {

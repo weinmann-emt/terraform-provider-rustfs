@@ -81,8 +81,8 @@ func (r *quotaRessource) Create(ctx context.Context, req resource.CreateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	quota := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
-	quota, err := r.client.RustClient.SetQuota(quota)
+	q := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
+	_, err := r.client.RustClient.SetQuota(q)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating bucket quota",
@@ -127,8 +127,15 @@ func (r *quotaRessource) Update(ctx context.Context, req resource.UpdateRequest,
 		return
 	}
 
-	quota := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
-	read, _ := r.client.RustClient.SetQuota(quota)
+	q := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
+	read, err := r.client.RustClient.SetQuota(q)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error updating bucket quota",
+			"Could not update bucket quota, unexpected error: "+err.Error(),
+		)
+		return
+	}
 	plan.Quota = types.Int64Value(int64(read.Quota))
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)

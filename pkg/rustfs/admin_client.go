@@ -30,7 +30,6 @@ type RustfsAdminConfig struct {
 
 type RustfsAdmin struct {
 	httpClient   *http.Client
-	insecure     bool
 	endpointURL  string
 	accessKey    string
 	accessSecret string
@@ -45,8 +44,7 @@ type RequestData struct {
 }
 
 func New(config *RustfsAdminConfig) (client RustfsAdmin) {
-	endpoint, _ := client.createEndpointUrl(config.Endpoint, config.Ssl)
-	client.endpointURL = endpoint
+	client.endpointURL = client.createEndpointUrl(config.Endpoint, config.Ssl)
 	client.httpClient = &http.Client{}
 	client.accessKey = config.AccessKey
 	client.accessSecret = config.AccessSecret
@@ -91,7 +89,7 @@ func (c *RustfsAdmin) doRequest(ctx context.Context, reqData RequestData) (res *
 	return
 }
 
-func (c *RustfsAdmin) createEndpointUrl(endpoint string, secure bool) (string, error) {
+func (c *RustfsAdmin) createEndpointUrl(endpoint string, secure bool) string {
 	scheme := "https"
 	if !secure {
 		scheme = "http"
@@ -105,7 +103,7 @@ func (c *RustfsAdmin) createEndpointUrl(endpoint string, secure bool) (string, e
 		endpoint = strings.TrimSuffix(endpoint, ":80")
 	}
 
-	return scheme + "://" + endpoint + "/rustfs/admin/" + rustfsApiVersion, nil
+	return scheme + "://" + endpoint + "/rustfs/admin/" + rustfsApiVersion
 }
 
 func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*http.Request, error) {

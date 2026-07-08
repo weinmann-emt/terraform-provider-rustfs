@@ -20,6 +20,7 @@ func (c *RustfsAdmin) CreateUserAccount(user UserAccount) error {
 	urlValues := make(url.Values)
 	urlValues.Set("accessKey", user.AccessKey)
 
+	//#nosec G117 — AccessKey is a public identifier, not a secret
 	bytes, err := json.Marshal(user)
 	if err != nil {
 		return err
@@ -62,7 +63,7 @@ func (c *RustfsAdmin) ReadUserAccount(name string) (UserAccount, error) {
 	}
 	err = json.NewDecoder(resp.Body).Decode(&instance)
 	instance.AccessKey = name
-	return instance, nil
+	return instance, err
 
 }
 
