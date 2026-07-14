@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,8 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource = &quotaRessource{}
+	_ resource.Resource                = &quotaRessource{}
+	_ resource.ResourceWithImportState = &quotaRessource{}
 )
 
 // NewquotaRessource is a helper function to simplify the provider implementation.
@@ -111,8 +113,6 @@ func (r *quotaRessource) Read(ctx context.Context, req resource.ReadRequest, res
 	// Save update status
 	state.Quota = types.Int64Value(int64(read.Quota))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -150,6 +150,13 @@ func (r *quotaRessource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 	err := r.client.RustClient.DeletQuota(data.Bucket.ValueString())
 	if err != nil {
-		tflog.Error(ctx, err.Error())
+		resp.Diagnostics.AddError(
+			"Error deleting bucket quota",
+			"Could not delete bucket quota, unexpected error: "+err.Error(),
+		)
 	}
+}
+
+func (r *quotaRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("bucket"), req, resp)
 }

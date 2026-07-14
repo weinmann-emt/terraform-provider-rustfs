@@ -18,3 +18,11 @@ Manage S3 buckets in rustfs
 ### Required
 
 - `name` (String) Name of the bucket
+
+## Import
+
+Import is supported using the bucket name:
+
+```
+terraform import rustfs_bucket.my_bucket my-bucket-name
+```
