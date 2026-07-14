@@ -49,10 +49,6 @@ func (c *RustfsAdmin) SetQuota(new Quota) (quota Quota, err error) {
 }
 
 func (c *RustfsAdmin) DeletQuota(bucket string) (err error) {
-
-	if err != nil {
-		return err
-	}
 	req_data := RequestData{
 		Method:  "DELETE",
 		RelPath: "quota/" + bucket,
