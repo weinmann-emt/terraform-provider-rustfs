@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
@@ -23,7 +24,8 @@ type serviceAccountResourceModel struct {
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource = &ServiceAccountRessource{}
+	_ resource.Resource                = &ServiceAccountRessource{}
+	_ resource.ResourceWithImportState = &ServiceAccountRessource{}
 )
 
 // NewServiceAccountRessource is a helper function to simplify the provider implementation.
@@ -81,7 +83,7 @@ func (r *ServiceAccountRessource) Configure(_ context.Context, req resource.Conf
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -111,7 +113,7 @@ func (r *ServiceAccountRessource) Create(ctx context.Context, req resource.Creat
 	err := r.client.RustClient.CreateServiceAccount(account)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating policy",
+			"Error creating service account",
 			"Could not create service account, unexpected error: "+err.Error(),
 		)
 		return
@@ -140,8 +142,8 @@ func (r *ServiceAccountRessource) Read(ctx context.Context, req resource.ReadReq
 	actual, err := r.client.RustClient.ReadServiceAccount(state.AccessKey.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading policy",
-			"Could not read service avvount, unexpected error: "+err.Error(),
+			"Error reading service account",
+			"Could not read service account, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -150,8 +152,6 @@ func (r *ServiceAccountRessource) Read(ctx context.Context, req resource.ReadReq
 	state.Description = types.StringValue(actual.Description)
 	// Save update status
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -176,8 +176,8 @@ func (r *ServiceAccountRessource) Update(ctx context.Context, req resource.Updat
 	err := r.client.RustClient.UpdateServiceAccount(account)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating policy",
-			"Could not update order, unexpected error: "+err.Error(),
+			"Error updating service account",
+			"Could not update service account, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -210,6 +210,13 @@ func (r *ServiceAccountRessource) Delete(ctx context.Context, req resource.Delet
 	}
 	err := r.client.RustClient.DeleteServiceAccount(account)
 	if err != nil {
-		tflog.Error(ctx, err.Error())
+		resp.Diagnostics.AddError(
+			"Error deleting service account",
+			"Could not delete service account, unexpected error: "+err.Error(),
+		)
 	}
+}
+
+func (r *ServiceAccountRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("access_key"), req, resp)
 }

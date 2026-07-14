@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
@@ -27,7 +28,8 @@ type policyResourceModel struct {
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource = &PolicyRessource{}
+	_ resource.Resource                = &PolicyRessource{}
+	_ resource.ResourceWithImportState = &PolicyRessource{}
 )
 
 // NewPolicyRessource is a helper function to simplify the provider implementation.
@@ -88,7 +90,7 @@ func (r *PolicyRessource) Configure(_ context.Context, req resource.ConfigureReq
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -129,7 +131,7 @@ func (r *PolicyRessource) Create(ctx context.Context, req resource.CreateRequest
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating policy",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Could not create policy, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -159,7 +161,7 @@ func (r *PolicyRessource) Read(ctx context.Context, req resource.ReadRequest, re
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading policy",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Could not read policy, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -178,8 +180,6 @@ func (r *PolicyRessource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 	// Save update status
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -244,4 +244,8 @@ func (r *PolicyRessource) Delete(ctx context.Context, req resource.DeleteRequest
 		)
 		return
 	}
+}
+
+func (r *PolicyRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

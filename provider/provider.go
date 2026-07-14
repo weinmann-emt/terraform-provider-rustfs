@@ -82,33 +82,28 @@ func (p *RustfsProvider) Configure(ctx context.Context, req provider.ConfigureRe
 
 	generatedConfig := generateRustClientConfig(config)
 
-	// Example client configuration for data sources and resources
 	tr, err := minio.DefaultTransport(config.Ssl.ValueBool())
-	if config.Insecure.ValueBool() {
-		tr.TLSClientConfig.InsecureSkipVerify = true
-	}
 	if err != nil {
 		resp.Diagnostics.AddError(err.Error(), err.Error())
 		return
 	}
-	minico_client, err := minio.New(config.Endpoint.ValueString(), &minio.Options{
+	if config.Insecure.ValueBool() {
+		tr.TLSClientConfig.InsecureSkipVerify = true
+	}
+	minio_client, err := minio.New(config.Endpoint.ValueString(), &minio.Options{
 		Secure:    config.Ssl.ValueBool(),
 		Creds:     credentials.NewStaticV4(config.AccessKey.ValueString(), config.AccessSecret.ValueString(), ""),
 		Transport: tr,
+		Region:    "us-east-1",
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(err.Error(), err.Error())
 		return
 	}
 	client := &AllClient{
-		Minio:      minico_client,
+		Minio:      minio_client,
 		RustClient: rustfs.New(generatedConfig),
 	}
-
-	// if err != nil {
-	// 	resp.Diagnostics.AddError(err.Error(), err.Error())
-	// 	return
-	// }
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }

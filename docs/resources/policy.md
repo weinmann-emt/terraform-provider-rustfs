@@ -32,3 +32,11 @@ Required:
 - `action` (List of String)
 - `effect` (String)
 - `ressource` (List of String)
+
+## Import
+
+Import is supported using the policy name:
+
+```
+terraform import rustfs_policy.my_policy my-policy-name
+```
