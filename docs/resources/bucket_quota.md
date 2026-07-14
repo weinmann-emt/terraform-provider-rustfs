@@ -19,3 +19,11 @@ Manage S3 bucket quotas in rustfs
 
 - `bucket` (String) Name of the bucket
 - `quota` (Number) Bytes of the quota
+
+## Import
+
+Import is supported using the bucket name:
+
+```
+terraform import rustfs_quota.my_quota my-bucket-name
+```
