@@ -58,7 +58,7 @@ func (r *bucketRessource) Configure(_ context.Context, req resource.ConfigureReq
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -80,8 +80,8 @@ func (r *bucketRessource) Create(ctx context.Context, req resource.CreateRequest
 	exists, err := r.client.Minio.BucketExists(ctx, plan.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating bucket",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Error checking bucket",
+			"Could not check bucket existence: "+err.Error(),
 		)
 		return
 	}
@@ -99,7 +99,7 @@ func (r *bucketRessource) Create(ctx context.Context, req resource.CreateRequest
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating bucket",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Could not create bucket: "+err.Error(),
 		)
 		return
 	}

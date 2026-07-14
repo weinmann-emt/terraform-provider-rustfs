@@ -78,7 +78,7 @@ func (r *ServiceAccountRessource) Configure(_ context.Context, req resource.Conf
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -108,7 +108,7 @@ func (r *ServiceAccountRessource) Create(ctx context.Context, req resource.Creat
 	err := r.client.RustClient.CreateServiceAccount(account)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating policy",
+			"Error creating service account",
 			"Could not create service account, unexpected error: "+err.Error(),
 		)
 		return
@@ -137,8 +137,8 @@ func (r *ServiceAccountRessource) Read(ctx context.Context, req resource.ReadReq
 	actual, err := r.client.RustClient.ReadServiceAccount(state.AccessKey.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error reading policy",
-			"Could not read service avvount, unexpected error: "+err.Error(),
+			"Error reading service account",
+			"Could not read service account, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -170,8 +170,8 @@ func (r *ServiceAccountRessource) Update(ctx context.Context, req resource.Updat
 	err := r.client.RustClient.UpdateServiceAccount(account)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error updating policy",
-			"Could not update order, unexpected error: "+err.Error(),
+			"Error updating service account",
+			"Could not update service account, unexpected error: "+err.Error(),
 		)
 		return
 	}
