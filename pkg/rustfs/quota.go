@@ -39,11 +39,11 @@ func (c *RustfsAdmin) SetQuota(new Quota) (quota Quota, err error) {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	c.doRequest(ctx, req_data)
 	resp, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return Quota{}, err
 	}
+	defer resp.Body.Close()
 	err = json.NewDecoder(resp.Body).Decode(&quota)
 	if err != nil {
 		return Quota{}, err
@@ -52,20 +52,16 @@ func (c *RustfsAdmin) SetQuota(new Quota) (quota Quota, err error) {
 }
 
 func (c *RustfsAdmin) DeletQuota(bucket string) (err error) {
-
-	if err != nil {
-		return err
-	}
 	req_data := RequestData{
 		Method:  "DELETE",
 		RelPath: "quota/" + bucket,
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	c.doRequest(ctx, req_data)
-	_, err = c.doRequest(ctx, req_data)
+	resp, err := c.doRequest(ctx, req_data)
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	return nil
 }

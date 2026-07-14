@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,8 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource = &bucketRessource{}
+	_ resource.Resource                = &bucketRessource{}
+	_ resource.ResourceWithImportState = &bucketRessource{}
 )
 
 // NewbucketRessource is a helper function to simplify the provider implementation.
@@ -56,7 +58,7 @@ func (r *bucketRessource) Configure(_ context.Context, req resource.ConfigureReq
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -78,8 +80,8 @@ func (r *bucketRessource) Create(ctx context.Context, req resource.CreateRequest
 	exists, err := r.client.Minio.BucketExists(ctx, plan.Name.ValueString())
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating bucket",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Error checking bucket",
+			"Could not check bucket existence: "+err.Error(),
 		)
 		return
 	}
@@ -92,12 +94,12 @@ func (r *bucketRessource) Create(ctx context.Context, req resource.CreateRequest
 	}
 
 	err = r.client.Minio.MakeBucket(ctx, plan.Name.ValueString(), minio.MakeBucketOptions{
-		Region: "us-east-01",
+		Region: "us-east-1",
 	})
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating bucket",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Could not create bucket: "+err.Error(),
 		)
 		return
 	}
@@ -121,8 +123,6 @@ func (r *bucketRessource) Read(ctx context.Context, req resource.ReadRequest, re
 	}
 	// Save update status
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -157,6 +157,13 @@ func (r *bucketRessource) Delete(ctx context.Context, req resource.DeleteRequest
 
 	err := r.client.Minio.RemoveBucket(ctx, data.Name.ValueString())
 	if err != nil {
-		tflog.Error(ctx, err.Error())
+		resp.Diagnostics.AddError(
+			"Error deleting bucket",
+			"Could not delete bucket, unexpected error: "+err.Error(),
+		)
 	}
+}
+
+func (r *bucketRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

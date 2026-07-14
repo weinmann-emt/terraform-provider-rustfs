@@ -76,8 +76,8 @@ func (r *RustfsUserRessource) Configure(_ context.Context, req resource.Configur
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -105,8 +105,8 @@ func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateReq
 	err := r.client.RustClient.CreateUserAccount(account)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating order",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Error creating user",
+			"Could not create user, unexpected error: "+err.Error(),
 		)
 		return
 	}
@@ -133,7 +133,7 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading user",
-			"Could read: "+err.Error(),
+			"Could not read user: "+err.Error(),
 		)
 		return
 	}
@@ -145,8 +145,6 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -204,5 +202,5 @@ func (r *RustfsUserRessource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *RustfsUserRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("access_key"), req, resp)
 }
