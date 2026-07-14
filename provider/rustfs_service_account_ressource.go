@@ -147,8 +147,6 @@ func (r *ServiceAccountRessource) Read(ctx context.Context, req resource.ReadReq
 	state.Description = types.StringValue(actual.Description)
 	// Save update status
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -206,7 +204,10 @@ func (r *ServiceAccountRessource) Delete(ctx context.Context, req resource.Delet
 	}
 	err := r.client.RustClient.DeleteServiceAccount(account)
 	if err != nil {
-		tflog.Error(ctx, err.Error())
+		resp.Diagnostics.AddError(
+			"Error deleting service account",
+			"Could not delete service account, unexpected error: "+err.Error(),
+		)
 	}
 }
 
