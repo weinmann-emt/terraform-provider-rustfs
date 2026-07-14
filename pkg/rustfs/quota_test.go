@@ -8,9 +8,8 @@ import (
 	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
-
 func TestReadQuota(t *testing.T) {
-	name :=  randomString(8)
+	name := randomString(8)
 	dut := getClient()
 	name = strings.ToLower(name)
 	dut.CreateBucket(name)
@@ -24,12 +23,12 @@ func TestReadQuota(t *testing.T) {
 	dut.DeleteBucket(name)
 }
 
-func TestCRDQuota(t *testing.T){
-	name :=  randomString(8)
+func TestCRDQuota(t *testing.T) {
+	name := randomString(8)
 	name = strings.ToLower(name)
 	quota := rustfs.Quota{
 		Bucket: name,
-		Quota: 100054541,
+		Quota:  100054541,
 	}
 	dut := getClient()
 	dut.CreateBucket(name)
@@ -51,6 +50,5 @@ func TestCRDQuota(t *testing.T){
 	if err != nil {
 		t.Error("error during quota remove")
 	}
-
 
 }
