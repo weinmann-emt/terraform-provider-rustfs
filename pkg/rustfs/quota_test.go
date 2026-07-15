@@ -9,11 +9,7 @@ import (
 )
 
 func TestReadQuota(t *testing.T) {
-<<<<<<< HEAD
 	name := randomString()
-=======
-	name := randomString(8)
->>>>>>> 26f8c99 (style: apply go fmt (fix/issue-12-env-vars))
 	dut := getClient()
 	name = strings.ToLower(name)
 	if err := dut.CreateBucket(name); err != nil {
@@ -32,11 +28,7 @@ func TestReadQuota(t *testing.T) {
 }
 
 func TestCRDQuota(t *testing.T) {
-<<<<<<< HEAD
 	name := randomString()
-=======
-	name := randomString(8)
->>>>>>> 26f8c99 (style: apply go fmt (fix/issue-12-env-vars))
 	name = strings.ToLower(name)
 	quota := rustfs.Quota{
 		Bucket: name,
