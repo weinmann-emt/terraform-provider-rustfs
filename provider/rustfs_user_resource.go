@@ -118,9 +118,7 @@ func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 	tflog.Trace(ctx, "created a resource")
-	// plan.ID = types.StringValue(account.AccessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
-	// plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 }
 
 func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -148,7 +146,6 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 	state.AccessKey = types.StringValue(state.AccessKey.ValueString())
 	state.SecretKey = types.StringValue(state.SecretKey.ValueString())
 	state.Policy = types.StringValue(read.Policy)
-	// state.ID = types.StringValue(state.ID.ValueString())
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)

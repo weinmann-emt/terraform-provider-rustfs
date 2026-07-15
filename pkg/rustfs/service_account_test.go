@@ -11,7 +11,7 @@ import (
 
 func getClient() rustfs.RustfsAdmin {
 	endpoint := os.Getenv("RUSTFS_ENDPOINT")
-	key := os.Getenv("RUSTFS_KEY")
+	key := os.Getenv("RUSTFS_USER")
 	secret := os.Getenv("RUSTFS_SECRET")
 
 	config := rustfs.RustfsAdminConfig{
@@ -26,11 +26,10 @@ func getClient() rustfs.RustfsAdmin {
 	return dut
 }
 
-func randomString() string {
+func randomString(length int) string {
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	const length = 8
 	result := make([]byte, length)
 
 	for i := range result {
@@ -43,9 +42,9 @@ func randomString() string {
 func TestCreateServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(),
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(),
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -57,9 +56,9 @@ func TestCreateServiceAccount(t *testing.T) {
 func TestCreateAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(),
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(),
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -74,9 +73,9 @@ func TestCreateAndDeleteServiceAccount(t *testing.T) {
 func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(),
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(),
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -96,9 +95,9 @@ func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 func TestCreateReadAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(),
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(),
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
