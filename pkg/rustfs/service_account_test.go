@@ -26,15 +26,10 @@ func getClient() rustfs.RustfsAdmin {
 	return dut
 }
 
-<<<<<<< HEAD
-func randomString() string {
-=======
 func randomString(length int) string {
->>>>>>> cc5174d (fix: check quota API errors, remove debug print, remove dead code, fix test env var and rand.Seed (#38))
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
-	const length = 8
 	result := make([]byte, length)
 
 	for i := range result {
@@ -47,9 +42,9 @@ func randomString(length int) string {
 func TestCreateServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(),
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(),
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -61,9 +56,9 @@ func TestCreateServiceAccount(t *testing.T) {
 func TestCreateAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(),
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(),
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -78,9 +73,9 @@ func TestCreateAndDeleteServiceAccount(t *testing.T) {
 func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(),
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(),
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -100,9 +95,9 @@ func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 func TestCreateReadAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(),
+		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(),
+		Name:      randomString(8),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
