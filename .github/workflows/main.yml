@@ -22,9 +22,9 @@ jobs:
         run: go fmt ./...
       - name: Run vet
         run: go vet ./...
-      # - name: Run Gosec Security Scanner
-      #   uses: securego/gosec@master
-      #   with:
-      #     args: ./...
+      - name: Run Gosec Security Scanner
+        uses: securego/gosec@master
+        with:
+          args: ./...
       - name: Run tests
         run: docker compose -f acc_test/docker-compose.yml run acceptance
