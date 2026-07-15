@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/types"
@@ -13,7 +14,8 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource = &quotaRessource{}
+	_ resource.Resource                = &quotaRessource{}
+	_ resource.ResourceWithImportState = &quotaRessource{}
 )
 
 // NewquotaRessource is a helper function to simplify the provider implementation.
@@ -61,7 +63,7 @@ func (r *quotaRessource) Configure(_ context.Context, req resource.ConfigureRequ
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
+			"Unexpected Resource Configure Type",
 			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
@@ -79,17 +81,16 @@ func (r *quotaRessource) Create(ctx context.Context, req resource.CreateRequest,
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	quota := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
-	quota, err := r.client.RustClient.SetQuota(quota)
+	q := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
+	_, err := r.client.RustClient.SetQuota(q)
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error creating bucket quota",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Could not create bucket quota, unexpected error: "+err.Error(),
 		)
 		return
 	}
 	tflog.Trace(ctx, "created a resource")
-	// plan.ID = types.StringValue(account.AccessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -107,12 +108,17 @@ func (r *quotaRessource) Read(ctx context.Context, req resource.ReadRequest, res
 		return
 	}
 	// Read
-	read, _ := r.client.RustClient.ReadQuota(state.Bucket.ValueString())
+	read, err := r.client.RustClient.ReadQuota(state.Bucket.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading bucket quota",
+			"Could not read bucket quota, unexpected error: "+err.Error(),
+		)
+		return
+	}
 	// Save update status
 	state.Quota = types.Int64Value(int64(read.Quota))
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -128,7 +134,14 @@ func (r *quotaRessource) Update(ctx context.Context, req resource.UpdateRequest,
 	}
 
 	quota := rustfs.Quota{Bucket: plan.Bucket.ValueString(), Quota: int(plan.Quota.ValueInt64()), Quota_Type: "HARD"}
-	read, _ := r.client.RustClient.SetQuota(quota)
+	read, err := r.client.RustClient.SetQuota(quota)
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error updating bucket quota",
+			"Could not update bucket quota, unexpected error: "+err.Error(),
+		)
+		return
+	}
 	plan.Quota = types.Int64Value(int64(read.Quota))
 	diags = resp.State.Set(ctx, plan)
 	resp.Diagnostics.Append(diags...)
@@ -150,6 +163,13 @@ func (r *quotaRessource) Delete(ctx context.Context, req resource.DeleteRequest,
 
 	err := r.client.RustClient.DeletQuota(data.Bucket.ValueString())
 	if err != nil {
-		tflog.Error(ctx, err.Error())
+		resp.Diagnostics.AddError(
+			"Error deleting bucket quota",
+			"Could not delete bucket quota, unexpected error: "+err.Error(),
+		)
 	}
+}
+
+func (r *quotaRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+	resource.ImportStatePassthroughID(ctx, path.Root("bucket"), req, resp)
 }

@@ -6,27 +6,18 @@ import (
 	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
+func envOrDefault(envKey, defaultValue string) string {
+	if v := os.Getenv(envKey); v != "" {
+		return v
+	}
+	return defaultValue
+}
+
 func generateRustClientConfig(model RustfsProviderModel) *rustfs.RustfsAdminConfig {
-
-	endpoint := os.Getenv("RUSTFS_ENDPOINT")
-	if endpoint == "" {
-		endpoint = model.Endpoint.ValueString()
-	}
-
-	user := os.Getenv("RUSTFS_USER")
-	if user == "" {
-		user = model.AccessKey.ValueString()
-	}
-
-	secret := os.Getenv("RUSTFS_SECRET")
-	if secret == "" {
-		secret = model.AccessSecret.ValueString()
-	}
-
 	config := &rustfs.RustfsAdminConfig{
-		Endpoint:     endpoint,
-		AccessKey:    user,
-		AccessSecret: secret,
+		Endpoint:     envOrDefault("RUSTFS_ENDPOINT", model.Endpoint.ValueString()),
+		AccessKey:    envOrDefault("RUSTFS_USER", model.AccessKey.ValueString()),
+		AccessSecret: envOrDefault("RUSTFS_SECRET", model.AccessSecret.ValueString()),
 		Ssl:          model.Ssl.ValueBool(),
 		Insecure:     model.Insecure.ValueBool(),
 	}

@@ -9,7 +9,7 @@ import (
 
 func TestIsAdmin(t *testing.T) {
 	endpoint := os.Getenv("RUSTFS_ENDPOINT")
-	key := os.Getenv("RUSTFS_KEY")
+	key := os.Getenv("RUSTFS_USER")
 	secret := os.Getenv("RUSTFS_SECRET")
 
 	config := rustfs.RustfsAdminConfig{

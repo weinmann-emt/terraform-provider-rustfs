@@ -30,7 +30,6 @@ type RustfsAdminConfig struct {
 
 type RustfsAdmin struct {
 	httpClient   *http.Client
-	insecure     bool
 	endpointURL  string
 	accessKey    string
 	accessSecret string
@@ -45,8 +44,7 @@ type RequestData struct {
 }
 
 func New(config *RustfsAdminConfig) (client RustfsAdmin) {
-	endpoint, _ := client.createEndpointUrl(config.Endpoint, config.Ssl)
-	client.endpointURL = endpoint
+	client.endpointURL = client.createEndpointUrl(config.Endpoint, config.Ssl)
 	client.httpClient = &http.Client{}
 	client.accessKey = config.AccessKey
 	client.accessSecret = config.AccessSecret
@@ -80,6 +78,9 @@ func (c *RustfsAdmin) doRequest(ctx context.Context, reqData RequestData) (res *
 	}
 
 	res, err = c.httpClient.Do(req)
+	if err != nil {
+		return
+	}
 	if res.StatusCode > 299 {
 		body, _ := io.ReadAll(res.Body)
 		return res, errors.New(string(body))
@@ -88,7 +89,7 @@ func (c *RustfsAdmin) doRequest(ctx context.Context, reqData RequestData) (res *
 	return
 }
 
-func (c *RustfsAdmin) createEndpointUrl(endpoint string, secure bool) (string, error) {
+func (c *RustfsAdmin) createEndpointUrl(endpoint string, secure bool) string {
 	scheme := "https"
 	if !secure {
 		scheme = "http"
@@ -102,7 +103,7 @@ func (c *RustfsAdmin) createEndpointUrl(endpoint string, secure bool) (string, e
 		endpoint = strings.TrimSuffix(endpoint, ":80")
 	}
 
-	return scheme + "://" + endpoint + "/rustfs/admin/" + rustfsApiVersion, nil
+	return scheme + "://" + endpoint + "/rustfs/admin/" + rustfsApiVersion
 }
 
 func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*http.Request, error) {
@@ -128,8 +129,8 @@ func (c *RustfsAdmin) createRequest(ctx context.Context, request RequestData) (*
 	return req, nil
 }
 
-func (c *RustfsAdmin) DoDirectRequest (ctx context.Context,  request RequestData)(res *http.Response, err error){
-	urlStr := strings.Replace(c.endpointURL, "/rustfs/admin/"+ rustfsApiVersion, "", 1) + "/" + request.RelPath
+func (c *RustfsAdmin) DoDirectRequest(ctx context.Context, request RequestData) (res *http.Response, err error) {
+	urlStr := strings.Replace(c.endpointURL, "/rustfs/admin/"+rustfsApiVersion, "", 1) + "/" + request.RelPath
 	// If there are any query values, add them to the end.
 	if len(request.QueryValues) > 0 {
 		urlStr = urlStr + "?" + s3utils.QueryEncode(request.QueryValues)
@@ -149,7 +150,10 @@ func (c *RustfsAdmin) DoDirectRequest (ctx context.Context,  request RequestData
 	req = signer.SignV4(*req, c.accessKey, c.accessSecret, "", "us-east-01")
 
 	res, err = c.httpClient.Do(req)
-	if res.StatusCode != 200 && res.StatusCode != 204 {
+	if err != nil {
+		return
+	}
+	if res.StatusCode != 200 {
 		body, _ := io.ReadAll(res.Body)
 		return res, errors.New(string(body))
 	}

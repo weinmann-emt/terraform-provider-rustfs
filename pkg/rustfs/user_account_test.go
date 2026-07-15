@@ -18,6 +18,9 @@ func TestCreateUserAccount(t *testing.T) {
 		t.Error(err)
 	}
 	read, err := dut.ReadUserAccount(account.AccessKey)
+	if err != nil {
+		t.Error(err)
+	}
 	if read.Status != "enabled" {
 		t.Error("wtf")
 	}

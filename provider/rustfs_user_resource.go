@@ -49,18 +49,25 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 			"access_key": schema.StringAttribute{
 				MarkdownDescription: "Access Key",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"secret_key": schema.StringAttribute{
 				MarkdownDescription: "Secret Key",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"status": schema.StringAttribute{
+				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Status",
+				MarkdownDescription: "User status (enabled/disabled). Defaults to enabled.",
 				Default:             stringdefault.StaticString("enabled"),
 			},
 			"policy": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "User policy. Changing this forces a new user to be created (the underlying API does not support updating a user's policy in-place).",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),
@@ -76,8 +83,8 @@ func (r *RustfsUserRessource) Configure(_ context.Context, req resource.Configur
 	client, ok := req.ProviderData.(*AllClient)
 	if !ok {
 		resp.Diagnostics.AddError(
-			"Unexpected Data Source Configure Type",
-			fmt.Sprintf("Expected *hashicups.Client, got: %T. Please report this issue to the provider developers.", req.ProviderData),
+			"Unexpected Resource Configure Type",
+			fmt.Sprintf("Expected *AllClient, got: %T. Please report this issue to the provider developers.", req.ProviderData),
 		)
 
 		return
@@ -105,15 +112,13 @@ func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateReq
 	err := r.client.RustClient.CreateUserAccount(account)
 	if err != nil {
 		resp.Diagnostics.AddError(
-			"Error creating order",
-			"Could not create order, unexpected error: "+err.Error(),
+			"Error creating user",
+			"Could not create user, unexpected error: "+err.Error(),
 		)
 		return
 	}
 	tflog.Trace(ctx, "created a resource")
-	// plan.ID = types.StringValue(account.AccessKey)
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
-	// plan.LastUpdated = types.StringValue(time.Now().Format(time.RFC850))
 }
 
 func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
@@ -133,7 +138,7 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 	if err != nil {
 		resp.Diagnostics.AddError(
 			"Error reading user",
-			"Could read: "+err.Error(),
+			"Could not read user: "+err.Error(),
 		)
 		return
 	}
@@ -141,12 +146,9 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 	state.AccessKey = types.StringValue(state.AccessKey.ValueString())
 	state.SecretKey = types.StringValue(state.SecretKey.ValueString())
 	state.Policy = types.StringValue(read.Policy)
-	// state.ID = types.StringValue(state.ID.ValueString())
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
-	diags = resp.State.Set(ctx, &state)
-	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
@@ -204,5 +206,5 @@ func (r *RustfsUserRessource) Delete(ctx context.Context, req resource.DeleteReq
 }
 
 func (r *RustfsUserRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
-	resource.ImportStatePassthroughID(ctx, path.Root("id"), req, resp)
+	resource.ImportStatePassthroughID(ctx, path.Root("access_key"), req, resp)
 }

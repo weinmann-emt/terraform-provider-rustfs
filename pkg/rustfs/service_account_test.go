@@ -11,7 +11,7 @@ import (
 
 func getClient() rustfs.RustfsAdmin {
 	endpoint := os.Getenv("RUSTFS_ENDPOINT")
-	key := os.Getenv("RUSTFS_KEY")
+	key := os.Getenv("RUSTFS_USER")
 	secret := os.Getenv("RUSTFS_SECRET")
 
 	config := rustfs.RustfsAdminConfig{
@@ -27,13 +27,13 @@ func getClient() rustfs.RustfsAdmin {
 }
 
 func randomString(length int) string {
-	rand.Seed(time.Now().UnixNano())
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
 	result := make([]byte, length)
 
 	for i := range result {
-		result[i] = charset[rand.Intn(len(charset))]
+		result[i] = charset[rng.Intn(len(charset))]
 	}
 
 	return string(result)

@@ -1,8 +1,6 @@
 package provider
 
 import (
-
-	// "github.com/hashicorp/terraform-plugin-framework/provider"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
@@ -29,7 +27,7 @@ provider "rustfs" {
 `
 )
 
-// Due to TestAcc this is _only_ an acceptance test
+// Due to TestAcc this is _only_ an acceptance test.
 func TestAccUserResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
