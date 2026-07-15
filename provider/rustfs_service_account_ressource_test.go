@@ -3,12 +3,10 @@ package provider
 import (
 	"testing"
 
-	// "github.com/hashicorp/terraform-plugin-framework/provider"
-
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-// Due to TestAcc this is _only_ an acceptance test
+// Due to TestAcc this is _only_ an acceptance test.
 func TestAccAserviceAccountResource(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,

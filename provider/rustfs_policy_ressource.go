@@ -13,7 +13,7 @@ import (
 	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
-// Data models
+// Data models.
 type policyStatementModel struct {
 	Effect    string   `tfsdk:"effect"`
 	Action    []string `tfsdk:"action"`

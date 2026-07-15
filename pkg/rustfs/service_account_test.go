@@ -26,14 +26,15 @@ func getClient() rustfs.RustfsAdmin {
 	return dut
 }
 
-func randomString(length int) string {
-	rand.Seed(time.Now().UnixNano())
+func randomString() string {
+	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	const length = 8
 	result := make([]byte, length)
 
 	for i := range result {
-		result[i] = charset[rand.Intn(len(charset))]
+		result[i] = charset[rng.Intn(len(charset))]
 	}
 
 	return string(result)
@@ -42,9 +43,9 @@ func randomString(length int) string {
 func TestCreateServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(8),
+		AccessKey: randomString(),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(8),
+		Name:      randomString(),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -56,9 +57,9 @@ func TestCreateServiceAccount(t *testing.T) {
 func TestCreateAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(8),
+		AccessKey: randomString(),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(8),
+		Name:      randomString(),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -73,9 +74,9 @@ func TestCreateAndDeleteServiceAccount(t *testing.T) {
 func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(8),
+		AccessKey: randomString(),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(8),
+		Name:      randomString(),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)
@@ -95,9 +96,9 @@ func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 func TestCreateReadAndDeleteServiceAccount(t *testing.T) {
 
 	account := rustfs.ServiceAccount{
-		AccessKey: randomString(8),
+		AccessKey: randomString(),
 		SecretKey: "someSuperS3cret",
-		Name:      randomString(8),
+		Name:      randomString(),
 	}
 	dut := getClient()
 	err := dut.CreateServiceAccount(account)

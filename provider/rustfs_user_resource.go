@@ -49,18 +49,25 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 			"access_key": schema.StringAttribute{
 				MarkdownDescription: "Access Key",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"secret_key": schema.StringAttribute{
 				MarkdownDescription: "Secret Key",
 				Required:            true,
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 			"status": schema.StringAttribute{
+				Optional:            true,
 				Computed:            true,
-				MarkdownDescription: "Status",
+				MarkdownDescription: "User status (enabled/disabled). Defaults to enabled.",
 				Default:             stringdefault.StaticString("enabled"),
 			},
 			"policy": schema.StringAttribute{
-				Required:            true,
+				Optional:            true,
 				MarkdownDescription: "User policy. Changing this forces a new user to be created (the underlying API does not support updating a user's policy in-place).",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.RequiresReplace(),

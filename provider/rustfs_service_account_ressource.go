@@ -7,6 +7,8 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
@@ -65,7 +67,10 @@ func (r *ServiceAccountRessource) Schema(_ context.Context, _ resource.SchemaReq
 			},
 			"user": schema.StringAttribute{
 				Optional:            true,
-				MarkdownDescription: "Optional user the token should be scoped to",
+				MarkdownDescription: "Optional user the token should be scoped to. Changing this forces a new resource to be created.",
+				PlanModifiers: []planmodifier.String{
+					stringplanmodifier.RequiresReplace(),
+				},
 			},
 		},
 	}
@@ -166,6 +171,7 @@ func (r *ServiceAccountRessource) Update(ctx context.Context, req resource.Updat
 		AccessKey:   plan.AccessKey.ValueString(),
 		SecretKey:   plan.SecretKey.ValueString(),
 		Description: plan.Description.ValueString(),
+		TargetUser:  plan.TargetUser.ValueString(),
 	}
 	err := r.client.RustClient.UpdateServiceAccount(account)
 	if err != nil {
