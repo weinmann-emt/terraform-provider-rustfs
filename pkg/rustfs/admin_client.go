@@ -153,7 +153,7 @@ func (c *RustfsAdmin) DoDirectRequest(ctx context.Context, request RequestData) 
 	if err != nil {
 		return
 	}
-	if res.StatusCode != 200 {
+	if res.StatusCode != 200 && res.StatusCode != 204 {
 		body, _ := io.ReadAll(res.Body)
 		return res, errors.New(string(body))
 	}

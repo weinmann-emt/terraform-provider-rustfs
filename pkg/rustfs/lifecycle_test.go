@@ -34,7 +34,7 @@ func TestCreateUpdateDelete(t *testing.T) {
 	if err != nil {
 		t.Error("Eror during create", err)
 	}
-	time.Sleep(5)
+	time.Sleep(5 * time.Second)
 
 	lifecycleConfig.Rules[0].Filter.Prefix = ""
 	lifecycleConfig.Rules = append(lifecycleConfig.Rules, rustfs.LifecycleRule{
@@ -51,7 +51,7 @@ func TestCreateUpdateDelete(t *testing.T) {
 	if err != nil {
 		t.Error("Eror during update", err)
 	}
-	time.Sleep(5)
+	time.Sleep(5 * time.Second)
 
 	err = dut.DeleteBucketLifecycleConfiguration(name)
 	if err != nil {
