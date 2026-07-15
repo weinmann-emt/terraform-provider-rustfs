@@ -65,7 +65,7 @@ func (c *RustfsAdmin) GetBucketLifecycleConfiguration(bucket string) (*Lifecycle
 	resp, err := c.DoDirectRequest(ctx, reqData)
 	if err != nil {
 		if resp != nil && resp.Body != nil {
-			resp.Body.Close()
+			_ = resp.Body.Close()
 		}
 		return nil, err
 	}
@@ -84,7 +84,6 @@ func (c *RustfsAdmin) GetBucketLifecycleConfiguration(bucket string) (*Lifecycle
 
 	return &config, nil
 }
-
 
 func (c *RustfsAdmin) DeleteBucketLifecycleConfiguration(bucket string) error {
 	reqData := RequestData{
