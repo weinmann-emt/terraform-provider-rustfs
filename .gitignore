@@ -35,4 +35,11 @@ website/vendor
 *.winfile eol=crlf
 .env
 terraform-provider-rustfs
+<<<<<<< HEAD
+=======
+
+# Superpowers plans (local only)
+>>>>>>> 7128ec2 (feat: add rustfs_bucket_versioning resource to manage S3 versioning (#52))
 docs/superpowers/
+docs/superpowers/
+
