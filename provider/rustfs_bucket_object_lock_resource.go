@@ -89,8 +89,16 @@ func (r *BucketObjectLockResource) Configure(_ context.Context, req resource.Con
 
 func (r *BucketObjectLockResource) setConfig(ctx context.Context, plan BucketObjectLockResourceModel) error {
 	mode := minio.RetentionMode(plan.Mode.ValueString())
-	days := uint(plan.Days.ValueInt64())
-	years := uint(plan.Years.ValueInt64())
+	daysVal := plan.Days.ValueInt64()
+	yearsVal := plan.Years.ValueInt64()
+	if daysVal < 0 {
+		daysVal = 0
+	}
+	if yearsVal < 0 {
+		yearsVal = 0
+	}
+	days := uint(daysVal)
+	years := uint(yearsVal)
 	var validity *uint
 	var unit *minio.ValidityUnit
 
@@ -147,9 +155,9 @@ func (r *BucketObjectLockResource) Read(ctx context.Context, req resource.ReadRe
 	if validity != nil && unit != nil {
 		switch *unit {
 		case minio.Days:
-			state.Days = types.Int64Value(int64(*validity))
+			state.Days = types.Int64Value(int64(*validity)) // #nosec G115
 		case minio.Years:
-			state.Years = types.Int64Value(int64(*validity))
+			state.Years = types.Int64Value(int64(*validity)) // #nosec G115
 		}
 	}
 
