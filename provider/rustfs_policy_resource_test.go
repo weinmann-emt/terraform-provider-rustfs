@@ -28,9 +28,11 @@ func TestAccPolicyResource_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateId:                        name,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "name",
 			},
 		},
 	})
@@ -40,12 +42,11 @@ func testAccPolicyConfig(name string) string {
 	return testAccProviderConfig() + fmt.Sprintf(`
 resource "rustfs_policy" "test" {
   name = "%s"
-  version = "2012-10-17"
-  statement {
+  statement = [{
     effect    = "Allow"
     action    = ["s3:GetObject", "s3:ListBucket"]
     ressource = ["arn:aws:s3:::*"]
-  }
+  }]
 }
 `, name)
 }

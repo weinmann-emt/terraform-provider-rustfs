@@ -28,10 +28,12 @@ func TestAccServiceAccountResource_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"secret_key"},
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateId:                        accessKey,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "access_key",
+				ImportStateVerifyIgnore:              []string{"secret_key"},
 			},
 		},
 	})

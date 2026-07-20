@@ -29,10 +29,12 @@ func TestAccUserResource_basic(t *testing.T) {
 				),
 			},
 			{
-				ResourceName:            resourceName,
-				ImportState:             true,
-				ImportStateVerify:       true,
-				ImportStateVerifyIgnore: []string{"secret_key"},
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateId:                        accessKey,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "access_key",
+				ImportStateVerifyIgnore:              []string{"secret_key"},
 			},
 		},
 	})
@@ -43,6 +45,8 @@ func testAccUserConfig(accessKey string) string {
 resource "rustfs_user" "test" {
   access_key = "%s"
   secret_key = "superSecret123!"
+  status     = "enabled"
+  policy     = ""
 }
 `, accessKey)
 }
