@@ -140,7 +140,7 @@ func (r *bucketLifecycleConfigurationRessource) Configure(_ context.Context, req
 func (r *bucketLifecycleConfigurationRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan bucketLifecycleConfigurationModel
 	diags := req.Plan.Get(ctx, &plan)
-	
+
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return

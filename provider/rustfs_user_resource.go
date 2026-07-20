@@ -46,8 +46,8 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 		Description:         "Manage RustFS user",
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
-				Optional:    true,
-				Computed:    true,
+				Optional:            true,
+				Computed:            true,
 				MarkdownDescription: "Display name. Defaults to access_key value. RustFS uses access_key as the user identifier.",
 			},
 			"access_key": schema.StringAttribute{
