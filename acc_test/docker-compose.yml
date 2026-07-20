@@ -10,6 +10,7 @@ services:
       - -c
       - |
         go mod download
+        go build ./...
         TF_ACC=1 go test -v -failfast -timeout 30m ./provider $${TEST_FILTER:+-run $$TEST_FILTER}
     environment:
       TF_ACC: "1"
@@ -19,7 +20,7 @@ services:
       TEST_FILTER: "${TEST_FILTER:-TestAcc}"
     depends_on:
       rustfs:
-        condition: service_healthy
+        condition: service_started
     profiles:
       - test
 
@@ -32,12 +33,6 @@ services:
       RUSTFS_ACCESS_KEY: rustfsadmin
       RUSTFS_SECRET_KEY: rustfsadmin
       RUSTFS_CONSOLE_ENABLE: true
-    healthcheck:
-      test: ["CMD", "sh", "-c", "curl -s -o /dev/null -w '%{http_code}' http://localhost:9001/rustfs/admin/v3/is-admin | grep -q '^[23]'"]
-      interval: 5s
-      timeout: 5s
-      retries: 12
-      start_period: 10s
 
 volumes:
   go-modules:
