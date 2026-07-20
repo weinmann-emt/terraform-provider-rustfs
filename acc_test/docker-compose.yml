@@ -19,16 +19,25 @@ services:
       TEST_FILTER: "${TEST_FILTER:-TestAcc}"
     depends_on:
       rustfs:
-        condition: service_started
+        condition: service_healthy
     profiles:
       - test
 
   rustfs:
     image: rustfs/rustfs:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     environment:
       RUSTFS_ACCESS_KEY: rustfsadmin
       RUSTFS_SECRET_KEY: rustfsadmin
       RUSTFS_CONSOLE_ENABLE: true
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:9001/rustfs/admin/v3/is-admin"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
 
 volumes:
   go-modules:
