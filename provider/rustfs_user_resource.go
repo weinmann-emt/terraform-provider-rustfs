@@ -175,6 +175,7 @@ func (r *RustfsUserRessource) Update(ctx context.Context, req resource.UpdateReq
 		AccessKey: plan.AccessKey.ValueString(),
 		SecretKey: plan.SecretKey.ValueString(),
 		Policy:    plan.Policy.ValueString(),
+		Status:    plan.Status.ValueString(),
 	}
 
 	err := r.client.RustClient.UpdateUserAccount(account)
