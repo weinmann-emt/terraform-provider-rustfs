@@ -8,6 +8,7 @@ jobs:
   checkup:
     name: Checkup
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     env:
       GOARCH: amd64
       GOOS: linux
@@ -26,5 +27,17 @@ jobs:
         uses: securego/gosec@master
         with:
           args: ./...
-      - name: Run tests
-        run: docker compose -f acc_test/docker-compose.yml run acceptance
+      - name: Build test environment
+        run: |
+          docker compose -f acc_test/docker-compose.yml build
+          docker compose -f acc_test/docker-compose.yml up -d
+      - name: Wait for RustFS to be ready
+        run: |
+          echo "Waiting for RustFS..."
+          timeout 120 bash -c 'until curl -sf http://localhost:9001/rustfs/admin/v3/is-admin >/dev/null 2>&1; do sleep 2; done'
+          echo "RustFS is ready!"
+      - name: Run acceptance tests
+        run: docker compose -f acc_test/docker-compose.yml run --rm test
+      - name: Cleanup
+        if: always()
+        run: docker compose -f acc_test/docker-compose.yml down -v

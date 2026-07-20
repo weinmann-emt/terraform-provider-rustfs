@@ -1,19 +1,34 @@
 services:
-  acceptance:
-    image: golang:1.25
+  test:
+    image: golang:1.23
     volumes:
       - ..:/workspaces/terraform-provider-rustfs
+      - go-modules:/go/pkg/mod
     working_dir: /workspaces/terraform-provider-rustfs
-    command: bash -c "\ ls && \ cp .terraformrc ~/.terraformrc && \ go mod tidy && \ go build -buildvcs=false && \ TF_ACC=1 go test ./provider/ && \ echo something "
+    command:
+      - bash
+      - -c
+      - |
+        go mod download
+        TF_ACC=1 go test -v -failfast -timeout 30m ./provider $${TEST_FILTER:+-run $$TEST_FILTER}
+    environment:
+      TF_ACC: "1"
+      RUSTFS_ENDPOINT: "rustfs:9001"
+      RUSTFS_USER: "rustfsadmin"
+      RUSTFS_SECRET: "rustfsadmin"
+      TEST_FILTER: "${TEST_FILTER:-TestAcc}"
     depends_on:
       rustfs:
         condition: service_started
+    profiles:
+      - test
 
   rustfs:
     image: rustfs/rustfs:latest
-    ports:
-      - "9000:9000"
-      - "9001:9001"
     environment:
       RUSTFS_ACCESS_KEY: rustfsadmin
       RUSTFS_SECRET_KEY: rustfsadmin
+      RUSTFS_CONSOLE_ENABLE: true
+
+volumes:
+  go-modules:
