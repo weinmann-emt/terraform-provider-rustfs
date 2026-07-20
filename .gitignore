@@ -35,3 +35,4 @@ website/vendor
 *.winfile eol=crlf
 .env
 terraform-provider-rustfs
+docs/superpowers/

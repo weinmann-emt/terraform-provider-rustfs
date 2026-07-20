@@ -132,7 +132,7 @@ func (p *RustfsProvider) Resources(ctx context.Context) []func() resource.Resour
 
 func (p *RustfsProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		// NewExampleDataSource,
+		NewPoolsDataSource,
 	}
 }
 
