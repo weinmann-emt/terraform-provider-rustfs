@@ -15,28 +15,29 @@ var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServe
 	"rustfs": providerserver.NewProtocol6WithError(New("test")()),
 }
 
-var requiredEnvVars = []string{
-	"RUSTFS_ENDPOINT",
-	"RUSTFS_USER",
-	"RUSTFS_SECRET",
-}
-
 func testAccPreCheck(t *testing.T) {
 	if os.Getenv("TF_ACC") == "" {
 		t.Skip("TF_ACC must be set for acceptance tests")
 	}
-	for _, env := range requiredEnvVars {
-		if os.Getenv(env) == "" {
-			t.Fatalf("%s must be set for acceptance tests", env)
-		}
-	}
 }
 
 func testAccProviderConfig() string {
+	endpoint := os.Getenv("RUSTFS_ENDPOINT")
+	if endpoint == "" {
+		endpoint = "rustfs:9001"
+	}
+	user := os.Getenv("RUSTFS_USER")
+	if user == "" {
+		user = "rustfsadmin"
+	}
+	secret := os.Getenv("RUSTFS_SECRET")
+	if secret == "" {
+		secret = "rustfsadmin"
+	}
 	return `provider "rustfs" {
-  endpoint      = "` + os.Getenv("RUSTFS_ENDPOINT") + `"
-  access_key    = "` + os.Getenv("RUSTFS_USER") + `"
-  access_secret = "` + os.Getenv("RUSTFS_SECRET") + `"
+  endpoint      = "` + endpoint + `"
+  access_key    = "` + user + `"
+  access_secret = "` + secret + `"
   ssl           = false
 }
 `
