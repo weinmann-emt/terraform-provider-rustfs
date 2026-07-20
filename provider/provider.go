@@ -128,12 +128,15 @@ func (p *RustfsProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewquotaRessource,
 		NewGroupResource,
 		NewBucketLifecycleConfigurationRessource,
+		NewBucketObjectLockResource,
+		NewBucketVersioningResource,
 	}
 }
 
 func (p *RustfsProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
-		// NewExampleDataSource,
+		NewPoolsDataSource,
+		NewUsersDataSource,
 	}
 }
 
