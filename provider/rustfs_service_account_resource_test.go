@@ -2,11 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
 func TestAccServiceAccountResource_basic(t *testing.T) {
@@ -73,8 +75,12 @@ func testAccCheckServiceAccountExists(n string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
 		}
-		client := testAccRustClient()
-		_, err := client.ReadServiceAccount(rs.Primary.ID)
+		accessKey := rs.Primary.Attributes["access_key"]
+		if accessKey == "" {
+			return fmt.Errorf("no access_key set")
+		}
+		client := testAccSAClient()
+		_, err := client.ReadServiceAccount(accessKey)
 		if err != nil {
 			return fmt.Errorf("service account not found: %s", err)
 		}
@@ -83,15 +89,27 @@ func testAccCheckServiceAccountExists(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckServiceAccountDestroy(s *terraform.State) error {
-	client := testAccRustClient()
+	client := testAccSAClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "rustfs_serviceaccount" {
 			continue
 		}
-		_, err := client.ReadServiceAccount(rs.Primary.ID)
+		accessKey := rs.Primary.Attributes["access_key"]
+		if accessKey == "" {
+			continue
+		}
+		_, err := client.ReadServiceAccount(accessKey)
 		if err == nil {
-			return fmt.Errorf("service account %s still exists", rs.Primary.ID)
+			return fmt.Errorf("service account %s still exists", accessKey)
 		}
 	}
 	return nil
+}
+
+func testAccSAClient() rustfs.RustfsAdmin {
+	return rustfs.New(&rustfs.RustfsAdminConfig{
+		Endpoint:     os.Getenv("RUSTFS_ENDPOINT"),
+		AccessKey:    os.Getenv("RUSTFS_USER"),
+		AccessSecret: os.Getenv("RUSTFS_SECRET"),
+	})
 }

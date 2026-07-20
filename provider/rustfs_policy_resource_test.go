@@ -2,11 +2,13 @@ package provider
 
 import (
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 	"github.com/hashicorp/terraform-plugin-testing/terraform"
+	"github.com/weinmann-emt/terraform-provider-rustfs/pkg/rustfs"
 )
 
 func TestAccPolicyResource_basic(t *testing.T) {
@@ -38,6 +40,7 @@ func testAccPolicyConfig(name string) string {
 	return testAccProviderConfig() + fmt.Sprintf(`
 resource "rustfs_policy" "test" {
   name = "%s"
+  version = "2012-10-17"
   statement {
     effect    = "Allow"
     action    = ["s3:GetObject", "s3:ListBucket"]
@@ -53,8 +56,12 @@ func testAccCheckPolicyExists(n string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
 		}
-		client := testAccRustClient()
-		_, err := client.ReadPolicy(rs.Primary.ID)
+		policyName := rs.Primary.Attributes["name"]
+		if policyName == "" {
+			return fmt.Errorf("no policy name set")
+		}
+		client := testAccPolicyClient()
+		_, err := client.ReadPolicy(policyName)
 		if err != nil {
 			return fmt.Errorf("policy not found: %s", err)
 		}
@@ -63,15 +70,27 @@ func testAccCheckPolicyExists(n string) resource.TestCheckFunc {
 }
 
 func testAccCheckPolicyDestroy(s *terraform.State) error {
-	client := testAccRustClient()
+	client := testAccPolicyClient()
 	for _, rs := range s.RootModule().Resources {
 		if rs.Type != "rustfs_policy" {
 			continue
 		}
-		_, err := client.ReadPolicy(rs.Primary.ID)
+		policyName := rs.Primary.Attributes["name"]
+		if policyName == "" {
+			continue
+		}
+		_, err := client.ReadPolicy(policyName)
 		if err == nil {
-			return fmt.Errorf("policy %s still exists", rs.Primary.ID)
+			return fmt.Errorf("policy %s still exists", policyName)
 		}
 	}
 	return nil
+}
+
+func testAccPolicyClient() rustfs.RustfsAdmin {
+	return rustfs.New(&rustfs.RustfsAdminConfig{
+		Endpoint:     os.Getenv("RUSTFS_ENDPOINT"),
+		AccessKey:    os.Getenv("RUSTFS_USER"),
+		AccessSecret: os.Getenv("RUSTFS_SECRET"),
+	})
 }

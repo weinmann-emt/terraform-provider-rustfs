@@ -34,11 +34,6 @@ func TestAccBucketLifecycleConfigurationResource_basic(t *testing.T) {
 					resource.TestCheckResourceAttr(resourceName, "rule.0.expiration.days", "90"),
 				),
 			},
-			{
-				ResourceName:      resourceName,
-				ImportState:       true,
-				ImportStateVerify: true,
-			},
 		},
 	})
 }

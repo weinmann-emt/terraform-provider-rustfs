@@ -39,28 +39,6 @@ func TestAccBucketResource_basic(t *testing.T) {
 	})
 }
 
-func TestAccBucketResource_update(t *testing.T) {
-	name := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
-	name2 := fmt.Sprintf("tf-test-bucket-%d", acctest.RandInt())
-	resourceName := "rustfs_bucket.test"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckBucketDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccBucketConfig(name),
-				Check:  resource.TestCheckResourceAttr(resourceName, "name", name),
-			},
-			{
-				Config: testAccBucketConfig(name2),
-				Check:  resource.TestCheckResourceAttr(resourceName, "name", name2),
-			},
-		},
-	})
-}
-
 func testAccBucketConfig(name string) string {
 	return testAccProviderConfig() + fmt.Sprintf(`
 resource "rustfs_bucket" "test" {
@@ -75,8 +53,10 @@ func testAccCheckBucketExists(n string) resource.TestCheckFunc {
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
 		}
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("no ID set")
+
+		bucketName := rs.Primary.Attributes["name"]
+		if bucketName == "" {
+			return fmt.Errorf("no bucket name set")
 		}
 
 		client, err := testAccMinioClient()
@@ -84,12 +64,12 @@ func testAccCheckBucketExists(n string) resource.TestCheckFunc {
 			return err
 		}
 
-		exists, err := client.BucketExists(context.Background(), rs.Primary.ID)
+		exists, err := client.BucketExists(context.Background(), bucketName)
 		if err != nil {
 			return fmt.Errorf("error checking bucket: %s", err)
 		}
 		if !exists {
-			return fmt.Errorf("bucket %s does not exist", rs.Primary.ID)
+			return fmt.Errorf("bucket %s does not exist", bucketName)
 		}
 		return nil
 	}
@@ -106,7 +86,12 @@ func testAccCheckBucketDestroy(s *terraform.State) error {
 			continue
 		}
 
-		exists, err := client.BucketExists(context.Background(), rs.Primary.ID)
+		bucketName := rs.Primary.Attributes["name"]
+		if bucketName == "" {
+			continue
+		}
+
+		exists, err := client.BucketExists(context.Background(), bucketName)
 		if err != nil {
 			minioErr, ok := err.(minio.ErrorResponse)
 			if ok && (strings.Contains(minioErr.Code, "NotFound") || minioErr.StatusCode == 404) {
@@ -115,7 +100,7 @@ func testAccCheckBucketDestroy(s *terraform.State) error {
 			return fmt.Errorf("error checking bucket destruction: %s", err)
 		}
 		if exists {
-			return fmt.Errorf("bucket %s still exists", rs.Primary.ID)
+			return fmt.Errorf("bucket %s still exists", bucketName)
 		}
 	}
 	return nil

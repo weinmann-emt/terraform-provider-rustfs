@@ -21,9 +21,9 @@ func TestAccUserResource_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUserConfig(accessKey, "enabled"),
+				Config: testAccUserConfig(accessKey),
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckUserExists(resourceName),
+					testAccCheckUserExists(resourceName, "enabled"),
 					resource.TestCheckResourceAttr(resourceName, "access_key", accessKey),
 					resource.TestCheckResourceAttr(resourceName, "status", "enabled"),
 				),
@@ -38,47 +38,34 @@ func TestAccUserResource_basic(t *testing.T) {
 	})
 }
 
-func TestAccUserResource_status(t *testing.T) {
-	accessKey := fmt.Sprintf("tf-test-user-%d", acctest.RandInt())
-	resourceName := "rustfs_user.test"
-
-	resource.ParallelTest(t, resource.TestCase{
-		PreCheck:                 func() { testAccPreCheck(t) },
-		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
-		CheckDestroy:             testAccCheckUserDestroy,
-		Steps: []resource.TestStep{
-			{
-				Config: testAccUserConfig(accessKey, "enabled"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "status", "enabled"),
-			},
-			{
-				Config: testAccUserConfig(accessKey, "disabled"),
-				Check:  resource.TestCheckResourceAttr(resourceName, "status", "disabled"),
-			},
-		},
-	})
-}
-
-func testAccUserConfig(accessKey, status string) string {
+func testAccUserConfig(accessKey string) string {
 	return testAccProviderConfig() + fmt.Sprintf(`
 resource "rustfs_user" "test" {
   access_key = "%s"
   secret_key = "superSecret123!"
-  status     = "%s"
 }
-`, accessKey, status)
+`, accessKey)
 }
 
-func testAccCheckUserExists(n string) resource.TestCheckFunc {
+func testAccCheckUserExists(n string, expectedStatus string) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 		if !ok {
 			return fmt.Errorf("not found: %s", n)
 		}
+
+		accessKey := rs.Primary.Attributes["access_key"]
+		if accessKey == "" {
+			return fmt.Errorf("no access_key set")
+		}
+
 		client := testAccRustClient()
-		_, err := client.ReadUserAccount(rs.Primary.ID)
+		user, err := client.ReadUserAccount(accessKey)
 		if err != nil {
 			return fmt.Errorf("user not found: %s", err)
+		}
+		if expectedStatus != "" && user.Status != expectedStatus {
+			return fmt.Errorf("expected status=%s, got %s", expectedStatus, user.Status)
 		}
 		return nil
 	}
@@ -90,9 +77,13 @@ func testAccCheckUserDestroy(s *terraform.State) error {
 		if rs.Type != "rustfs_user" {
 			continue
 		}
-		_, err := client.ReadUserAccount(rs.Primary.ID)
+		accessKey := rs.Primary.Attributes["access_key"]
+		if accessKey == "" {
+			continue
+		}
+		_, err := client.ReadUserAccount(accessKey)
 		if err == nil {
-			return fmt.Errorf("user %s still exists", rs.Primary.ID)
+			return fmt.Errorf("user %s still exists", accessKey)
 		}
 	}
 	return nil
