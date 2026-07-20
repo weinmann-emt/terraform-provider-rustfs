@@ -25,12 +25,11 @@ type RustfsUserRessource struct {
 }
 
 type RustfsUserRessourceModel struct {
+	Name      types.String `tfsdk:"name"`
 	AccessKey types.String `tfsdk:"access_key"`
 	SecretKey types.String `tfsdk:"secret_key"`
 	Status    types.String `tfsdk:"status"`
 	Policy    types.String `tfsdk:"policy"`
-	// ID        types.String `tfsdk:"id"`
-	// Id        types.String `tfsdk:"id"`
 }
 
 func NewUserRessource() resource.Resource {
@@ -46,6 +45,11 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 		MarkdownDescription: "Manage RustFS user",
 		Description:         "Manage RustFS user",
 		Attributes: map[string]schema.Attribute{
+			"name": schema.StringAttribute{
+				Optional:            true,
+				Computed:            true,
+				MarkdownDescription: "Display name. Defaults to access_key value. RustFS uses access_key as the user identifier.",
+			},
 			"access_key": schema.StringAttribute{
 				MarkdownDescription: "Access Key",
 				Required:            true,
@@ -118,6 +122,9 @@ func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateReq
 		return
 	}
 	tflog.Trace(ctx, "created a resource")
+	if plan.Name.IsNull() || plan.Name.ValueString() == "" {
+		plan.Name = types.StringValue(plan.AccessKey.ValueString())
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
@@ -146,6 +153,9 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 	state.AccessKey = types.StringValue(state.AccessKey.ValueString())
 	state.SecretKey = types.StringValue(state.SecretKey.ValueString())
 	state.Policy = types.StringValue(read.Policy)
+	if state.Name.IsNull() || state.Name.ValueString() == "" {
+		state.Name = types.StringValue(state.AccessKey.ValueString())
+	}
 
 	// Save updated data into Terraform state
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
