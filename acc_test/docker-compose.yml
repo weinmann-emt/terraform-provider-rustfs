@@ -33,7 +33,7 @@ services:
       RUSTFS_SECRET_KEY: rustfsadmin
       RUSTFS_CONSOLE_ENABLE: true
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:9001/rustfs/admin/v3/is-admin"]
+      test: ["CMD", "sh", "-c", "curl -s -o /dev/null -w '%{http_code}' http://localhost:9001/rustfs/admin/v3/is-admin | grep -q '^[23]'"]
       interval: 5s
       timeout: 5s
       retries: 12
