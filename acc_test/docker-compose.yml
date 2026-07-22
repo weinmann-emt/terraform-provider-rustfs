@@ -1,13 +1,41 @@
 services:
-  acceptance:
-    image: golang:1.25
+  test:
+    image: golang:1.26
     volumes:
       - ..:/workspaces/terraform-provider-rustfs
+      - go-modules:/go/pkg/mod
+      - terraform-bin:/usr/local/terraform
     working_dir: /workspaces/terraform-provider-rustfs
-    command: bash -c "\ ls && \ cp .terraformrc ~/.terraformrc && \ go mod tidy && \ go build -buildvcs=false && \ TF_ACC=1 go test ./provider/ && \ echo something "
+    command:
+      - bash
+      - -c
+      - |
+        TERRAFORM_VERSION=1.11.4
+        TERRAFORM_BIN=/usr/local/terraform/terraform
+        if [ -f "$$TERRAFORM_BIN" ]; then
+          echo "Using cached Terraform..."
+        else
+          echo "Downloading Terraform $$TERRAFORM_VERSION..."
+          apt-get update -qq && apt-get install -y -qq unzip >/dev/null 2>&1
+          wget -q -O /tmp/terraform.zip "https://releases.hashicorp.com/terraform/$${TERRAFORM_VERSION}/terraform_$${TERRAFORM_VERSION}_linux_amd64.zip"
+          unzip -o /tmp/terraform.zip -d /usr/local/terraform
+          rm /tmp/terraform.zip
+        fi
+        ln -sf $$TERRAFORM_BIN /usr/local/bin/terraform
+        go mod download
+        go build ./...
+        TF_ACC=1 go test -v -failfast -timeout 30m ./provider $${TEST_FILTER:+-run $$TEST_FILTER}
+    environment:
+      TF_ACC: "1"
+      RUSTFS_ENDPOINT: "rustfs:9001"
+      RUSTFS_USER: "rustfsadmin"
+      RUSTFS_SECRET: "rustfsadmin"
+      TEST_FILTER: "${TEST_FILTER:-TestAcc}"
     depends_on:
       rustfs:
         condition: service_started
+    profiles:
+      - test
 
   rustfs:
     image: rustfs/rustfs:latest
@@ -17,3 +45,7 @@ services:
     environment:
       RUSTFS_ACCESS_KEY: rustfsadmin
       RUSTFS_SECRET_KEY: rustfsadmin
+
+volumes:
+  go-modules:
+  terraform-bin:

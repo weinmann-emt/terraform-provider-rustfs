@@ -1,80 +1,64 @@
 package provider
 
 import (
+	"fmt"
 	"testing"
 
+	"github.com/hashicorp/terraform-plugin-testing/helper/acctest"
 	"github.com/hashicorp/terraform-plugin-testing/helper/resource"
 )
 
-func TestAccBucketLifecycleConfigurationResource(t *testing.T) {
-	resource.Test(t, resource.TestCase{
+func TestAccBucketLifecycleConfigurationResource_basic(t *testing.T) {
+	name := fmt.Sprintf("tf-test-lc-%d", acctest.RandInt())
+	resourceName := "rustfs_bucket_lifecycle_configuration.test"
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
 		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckBucketDestroy,
 		Steps: []resource.TestStep{
-			// Create and Read
 			{
-				Config: providerConfig + `
-resource "rustfs_bucket" "test_bucket" {
-  name = "test-lifecycle-bucket"
-}
-
-resource "rustfs_bucket_lifecycle_configuration" "test" {
-  bucket = rustfs_bucket.test_bucket.name
-
-  rule {
-    id     = "rule1"
-    status = "Enabled"
-
-    filter {
-      prefix = "logs/"
-    }
-
-    expiration {
-      days = 30
-    }
-  }
-}
-`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "bucket", "test-lifecycle-bucket"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "id", "test-lifecycle-bucket"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "rule.0.id", "rule1"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "rule.0.status", "Enabled"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "rule.0.filter.prefix", "logs/"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "rule.0.expiration.days", "30"),
+				Config: testAccLifecycleConfig(name, "Enabled", "logs/", 30),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "rule.0.id", "rule1"),
+					resource.TestCheckResourceAttr(resourceName, "rule.0.status", "Enabled"),
+					resource.TestCheckResourceAttr(resourceName, "rule.0.filter.prefix", "logs/"),
+					resource.TestCheckResourceAttr(resourceName, "rule.0.expiration.days", "30"),
 				),
 			},
-			// Update and Read
 			{
-				Config: providerConfig + `
-resource "rustfs_bucket" "test_bucket" {
-  name = "test-lifecycle-bucket"
-}
-
-resource "rustfs_bucket_lifecycle_configuration" "test" {
-  bucket = rustfs_bucket.test_bucket.name
-
-  rule {
-    id     = "rule1"
-    status = "Disabled"
-
-    filter {
-      prefix = "archive/"
-    }
-
-    expiration {
-      days = 90
-    }
-  }
-}
-`,
-				Check: resource.ComposeAggregateTestCheckFunc(
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "bucket", "test-lifecycle-bucket"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "rule.0.id", "rule1"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "rule.0.status", "Disabled"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "rule.0.filter.prefix", "archive/"),
-					resource.TestCheckResourceAttr("rustfs_bucket_lifecycle_configuration.test", "rule.0.expiration.days", "90"),
+				Config: testAccLifecycleConfig(name, "Disabled", "archive/", 90),
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(resourceName, "rule.0.status", "Disabled"),
+					resource.TestCheckResourceAttr(resourceName, "rule.0.filter.prefix", "archive/"),
+					resource.TestCheckResourceAttr(resourceName, "rule.0.expiration.days", "90"),
 				),
 			},
 		},
 	})
+}
+
+func testAccLifecycleConfig(bucket, status, prefix string, days int) string {
+	return fmt.Sprintf(testAccProviderConfig()+`
+resource "rustfs_bucket" "test" {
+  name = "%s"
+}
+
+resource "rustfs_bucket_lifecycle_configuration" "test" {
+  bucket = rustfs_bucket.test.name
+
+  rule {
+    id     = "rule1"
+    status = "%s"
+
+    filter {
+      prefix = "%s"
+    }
+
+    expiration {
+      days = %d
+    }
+  }
+}
+`, bucket, status, prefix, days)
 }
