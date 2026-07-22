@@ -41,7 +41,7 @@ func randomString(length int) string {
 
 func TestCreateServiceAccount(t *testing.T) {
 
-	account := rustfs.ServiceAccount{
+	account := rustfs.ServiceAccountCreate{
 		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
 		Name:      randomString(8),
@@ -55,7 +55,7 @@ func TestCreateServiceAccount(t *testing.T) {
 
 func TestCreateAndDeleteServiceAccount(t *testing.T) {
 
-	account := rustfs.ServiceAccount{
+	account := rustfs.ServiceAccountCreate{
 		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
 		Name:      randomString(8),
@@ -65,14 +65,14 @@ func TestCreateAndDeleteServiceAccount(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	err = dut.DeleteServiceAccount(account)
+	err = dut.DeleteServiceAccount(account.AccessKey)
 	if err != nil {
 		t.Error(err)
 	}
 }
 func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 
-	account := rustfs.ServiceAccount{
+	account := rustfs.ServiceAccountCreate{
 		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
 		Name:      randomString(8),
@@ -82,19 +82,21 @@ func TestCreateUpdateAndDeleteServiceAccount(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	account.SecretKey = "insecureOne"
-	err = dut.UpdateServiceAccount(account)
+	accountUpdate := rustfs.ServiceAccountUpdate{
+		NewName: account.Name + "Updated",
+	}
+	err = dut.UpdateServiceAccount(account.AccessKey, accountUpdate)
 	if err != nil {
 		t.Error(err)
 	}
-	err = dut.DeleteServiceAccount(account)
+	err = dut.DeleteServiceAccount(account.AccessKey)
 	if err != nil {
 		t.Error(err)
 	}
 }
 func TestCreateReadAndDeleteServiceAccount(t *testing.T) {
 
-	account := rustfs.ServiceAccount{
+	account := rustfs.ServiceAccountCreate{
 		AccessKey: randomString(8),
 		SecretKey: "someSuperS3cret",
 		Name:      randomString(8),
@@ -111,7 +113,7 @@ func TestCreateReadAndDeleteServiceAccount(t *testing.T) {
 	if reply.Name != account.Name {
 		t.Error("Read value not matching")
 	}
-	err = dut.DeleteServiceAccount(account)
+	err = dut.DeleteServiceAccount(account.AccessKey)
 	if err != nil {
 		t.Error(err)
 	}

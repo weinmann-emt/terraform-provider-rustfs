@@ -6,24 +6,33 @@ import (
 	"net/url"
 )
 
-type ServiceAccount struct {
-	AccessKey     string `json:"accessKey"`
-	SecretKey     string `json:"secretKey"`
+type ServiceAccountGet struct {
 	Description   string `json:"description"`
 	Expiration    string `json:"expiration,omitempty"`
-	Expiry        bool   `json:"expiry"`
 	Name          string `json:"name"`
+	Policy        string `json:"policy"`
 	ImpliedPolicy bool   `json:"impliedPolicy"`
-	Policy        string `json:"policy,omitempty"`
-	TargetUser    string `json:"targetUser,omitempty"`
+	AccountStatus string `json:"accountStatus"`
+	ParentUser    string `json:"parentUser"`
+}
+
+type ServiceAccountCreate struct {
+	AccessKey   string `json:"accessKey"`
+	SecretKey   string `json:"secretKey"`
+	Description string `json:"description"`
+	Expiration  string `json:"expiration,omitempty"`
+	Expiry      bool   `json:"expiry"`
+	Name        string `json:"name"`
+	Policy      string `json:"policy,omitempty"`
+	TargetUser  string `json:"targetUser,omitempty"`
 }
 
 type ServiceAccountUpdate struct {
-	NewAccessKey   string `json:"newAccessKey"`
-	NewSecretKey   string `json:"newSecretKey"`
 	NewDescription string `json:"newDescription"`
 	NewExpiration  string `json:"newExpiration,omitempty"`
 	NewName        string `json:"newName"`
+	NewPolicy      string `json:"newPolicy,omitempty"`
+	NewSecretKey   string `json:"newSecretKey,omitempty"`
 }
 
 type serviceAccountCredentails struct {
@@ -36,8 +45,11 @@ type ServiceAccountReply struct {
 	Credentials serviceAccountCredentails `json:"credentials"`
 }
 
-func (c *RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
-	normalizeServiceAccount(&account)
+func (c *RustfsAdmin) CreateServiceAccount(account ServiceAccountCreate) error {
+	if account.Expiration == "" {
+		account.Expiration = "9999-01-01T00:00:00.000Z"
+	}
+
 	//#nosec G117 — AccessKey is a public identifier, not a secret
 	bytes, err := json.Marshal(account)
 	if err != nil {
@@ -59,10 +71,10 @@ func (c *RustfsAdmin) CreateServiceAccount(account ServiceAccount) error {
 	return err
 }
 
-func (c *RustfsAdmin) ReadServiceAccount(name string) (ServiceAccount, error) {
-	var instance ServiceAccount
+func (c *RustfsAdmin) ReadServiceAccount(accessKey string) (ServiceAccountGet, error) {
+	var instance ServiceAccountGet
 	urlValues := make(url.Values)
-	urlValues.Set("accessKey", name)
+	urlValues.Set("accessKey", accessKey)
 	req_data := RequestData{
 		Method:      "GET",
 		RelPath:     "info-service-account",
@@ -78,12 +90,10 @@ func (c *RustfsAdmin) ReadServiceAccount(name string) (ServiceAccount, error) {
 	return instance, err
 }
 
-func (c *RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
-	normalizeServiceAccount(&account)
-	updateRequest := createUpdate(account)
+func (c *RustfsAdmin) UpdateServiceAccount(accessKey string, account ServiceAccountUpdate) error {
 	urlValues := make(url.Values)
-	urlValues.Set("accessKey", account.AccessKey)
-	bytes, err := json.Marshal(updateRequest)
+	urlValues.Set("accessKey", accessKey)
+	bytes, err := json.Marshal(account)
 	if err != nil {
 		return err
 	}
@@ -102,10 +112,9 @@ func (c *RustfsAdmin) UpdateServiceAccount(account ServiceAccount) error {
 	return err
 }
 
-func (c *RustfsAdmin) DeleteServiceAccount(account ServiceAccount) error {
-	normalizeServiceAccount(&account)
+func (c *RustfsAdmin) DeleteServiceAccount(accessKey string) error {
 	urlValues := make(url.Values)
-	urlValues.Set("accessKey", account.AccessKey)
+	urlValues.Set("accessKey", accessKey)
 	req_data := RequestData{
 		Method:      "DELETE",
 		RelPath:     "delete-service-accounts",
@@ -118,24 +127,4 @@ func (c *RustfsAdmin) DeleteServiceAccount(account ServiceAccount) error {
 		return err
 	}
 	return err
-}
-
-func normalizeServiceAccount(account *ServiceAccount) {
-	// Set some defaults
-	if account.Expiration == "" {
-		account.Expiration = "9999-01-01T00:00:00.000Z"
-	}
-	if account.Policy == "" {
-		account.ImpliedPolicy = true
-	}
-}
-
-func createUpdate(account ServiceAccount) ServiceAccountUpdate {
-	return ServiceAccountUpdate{
-		NewAccessKey:   account.AccessKey,
-		NewSecretKey:   account.SecretKey,
-		NewDescription: account.Description,
-		NewExpiration:  account.Expiration,
-		NewName:        account.Name,
-	}
 }
