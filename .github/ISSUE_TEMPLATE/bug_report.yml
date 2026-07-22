@@ -1,0 +1,138 @@
+---
+name: Bug Report
+description: File a bug report to help us improve
+title: "[BUG]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report! Please provide as much detail as possible.
+
+  - type: textarea
+    id: bug-description
+    attributes:
+      label: Bug Description
+      description: A clear and concise description of what the bug is
+      placeholder: Describe what happened and what you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: Reproduction Steps
+      description: Steps to reproduce the behavior
+      placeholder: |
+        1. Configure provider with version X
+        2. Apply this configuration...
+        3. See error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What you expected to happen
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened
+    validations:
+      required: true
+
+  - type: textarea
+    id: terraform-config
+    attributes:
+      label: Terraform Configuration
+      description: Minimal configuration that reproduces the issue
+      render: hcl
+      placeholder: |
+        terraform {
+          required_providers {
+            rustfs = {
+              source = "weinmann-emt/rustfs"
+              version = "x.x.x"
+            }
+          }
+        }
+
+        provider "rustfs" {
+          endpoint      = "127.0.0.1:9001"
+          access_key    = "admin"
+          access_secret = "secret"
+        }
+
+        resource "rustfs_bucket" "test" {
+          name = "test-bucket"
+        }
+    validations:
+      required: true
+
+  - type: textarea
+    id: error-output
+    attributes:
+      label: Error Output
+      description: Full error message and stack trace
+      render: shell
+    validations:
+      required: false
+
+  - type: input
+    id: provider-version
+    attributes:
+      label: Provider Version
+      placeholder: "0.0.7"
+    validations:
+      required: true
+
+  - type: input
+    id: terraform-version
+    attributes:
+      label: Terraform Version
+      placeholder: "1.14.6"
+    validations:
+      required: true
+
+  - type: input
+    id: rustfs-version
+    attributes:
+      label: RustFS Version
+      placeholder: "1.0.0-beta.8"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: operating-system
+    attributes:
+      label: Operating System
+      options:
+        - Linux
+        - macOS
+        - Windows
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional-context
+    attributes:
+      label: Additional Context
+      description: Any additional information about your environment
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Confirmation
+      options:
+        - label: I have searched existing issues for similar problems
+          required: true
+        - label: I have provided all the requested information
+          required: true
