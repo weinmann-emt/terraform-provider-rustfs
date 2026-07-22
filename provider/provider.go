@@ -130,6 +130,7 @@ func (p *RustfsProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewBucketLifecycleConfigurationRessource,
 		NewTierResource,
 		NewBucketObjectLockResource,
+		NewBucketReplicationResource,
 		NewBucketEncryptionResource,
 		NewBucketVersioningResource,
 	}
