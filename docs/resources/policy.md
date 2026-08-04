@@ -31,6 +31,9 @@ Required:
 
 - `action` (List of String)
 - `effect` (String)
+
+Optional:
+
 - `ressource` (List of String)
 
 ## Import

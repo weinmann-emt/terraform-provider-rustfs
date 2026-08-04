@@ -11,7 +11,7 @@ import (
 type PolicyStatement struct {
 	Effect   string   `json:"Effect"`
 	Action   []string `json:"Action"`
-	Resource []string `json:"Resource"`
+	Resource []string `json:"Resource,omitempty"`
 }
 
 type PolicyStatementSinle struct {

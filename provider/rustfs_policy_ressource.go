@@ -74,7 +74,7 @@ func (r *PolicyRessource) Schema(_ context.Context, _ resource.SchemaRequest, re
 						},
 						"ressource": schema.SetAttribute{
 							ElementType: types.StringType,
-							Required:    true,
+							Optional:    true,
 						},
 					},
 				},
