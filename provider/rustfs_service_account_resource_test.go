@@ -21,7 +21,7 @@ func TestAccServiceAccountResource_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckServiceAccountDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceAccountConfig(accessKey, "test-service"),
+				Config: testAccServiceAccountConfig(accessKey, "test-service", ""),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckServiceAccountExists(resourceName),
 					resource.TestCheckResourceAttr(resourceName, "access_key", accessKey),
@@ -49,26 +49,67 @@ func TestAccServiceAccountResource_update(t *testing.T) {
 		CheckDestroy:             testAccCheckServiceAccountDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccServiceAccountConfig(accessKey, "original-name"),
+				Config: testAccServiceAccountConfig(accessKey, "original-name", ""),
 				Check:  resource.TestCheckResourceAttr(resourceName, "name", "original-name"),
 			},
 			{
-				Config: testAccServiceAccountConfig(accessKey, "updated-name"),
+				Config: testAccServiceAccountConfig(accessKey, "updated-name", ""),
 				Check:  resource.TestCheckResourceAttr(resourceName, "name", "updated-name"),
 			},
 		},
 	})
 }
 
-func testAccServiceAccountConfig(accessKey, name string) string {
+func TestAccServiceAccountResource_createPolicy(t *testing.T) {
+	accessKey := fmt.Sprintf("tf-test-sa-%d", acctest.RandInt())
+	resourceName := "rustfs_serviceaccount.test"
+	policy := `{
+		statement = [{
+			action = ["s3:*"]
+			effect = "Allow"
+			resource = ["arn:aws:s3:::test"]
+		}]
+	}`
+
+	resource.ParallelTest(t, resource.TestCase{
+		PreCheck:                 func() { testAccPreCheck(t) },
+		ProtoV6ProviderFactories: testAccProtoV6ProviderFactories,
+		CheckDestroy:             testAccCheckServiceAccountDestroy,
+		Steps: []resource.TestStep{
+			{
+				Config: testAccServiceAccountConfig(accessKey, "test-service", policy),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckServiceAccountExists(resourceName),
+					resource.TestCheckResourceAttr(resourceName, "access_key", accessKey),
+					resource.TestCheckResourceAttr(resourceName, "policy.statement.0.resource.0", "arn:aws:s3:::test"),
+				),
+			},
+			{
+				ResourceName:                         resourceName,
+				ImportState:                          true,
+				ImportStateId:                        accessKey,
+				ImportStateVerify:                    true,
+				ImportStateVerifyIdentifierAttribute: "access_key",
+				ImportStateVerifyIgnore:              []string{"secret_key"},
+			},
+		},
+	})
+}
+
+func testAccServiceAccountConfig(accessKey, name, policy string) string {
+	policyLine := ""
+	if policy != "" {
+		policyLine = fmt.Sprintf("  policy      = %s\n", policy)
+	}
+
 	return testAccProviderConfig() + fmt.Sprintf(`
 resource "rustfs_serviceaccount" "test" {
   access_key  = "%s"
   secret_key  = "superSecret123!"
   name        = "%s"
   description = "acceptance test service account"
-}
-`, accessKey, name)
+%s}
+`, accessKey, name, policyLine)
 }
 
 func testAccCheckServiceAccountExists(n string) resource.TestCheckFunc {
