@@ -60,7 +60,7 @@ func TestAddUserWithAccesKey(t *testing.T) {
 		t.Error(err)
 	}
 
-	service := rustfs.ServiceAccount{
+	service := rustfs.ServiceAccountCreate{
 		AccessKey:  randomString(8),
 		SecretKey:  "someSuperS3cret",
 		Name:       randomString(8),
@@ -71,7 +71,7 @@ func TestAddUserWithAccesKey(t *testing.T) {
 		t.Error(err)
 	}
 
-	err = dut.DeleteServiceAccount(service)
+	err = dut.DeleteServiceAccount(service.AccessKey)
 	if err != nil {
 		t.Error(err)
 	}
