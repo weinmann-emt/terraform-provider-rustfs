@@ -24,7 +24,7 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v7
         with:
           go-version-file: "go.mod"
       - name: Run fmt
@@ -48,7 +48,7 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v4
+        uses: actions/setup-go@v7
         with:
           go-version-file: "go.mod"
       - name: Build test environment
