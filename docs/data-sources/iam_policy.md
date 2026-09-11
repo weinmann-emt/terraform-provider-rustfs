@@ -31,5 +31,5 @@ output "readwrite_actions" {
 - `statement` (List of Object) Policy statements. Each entry has:
   - `effect` (String) Effect (Allow or Deny).
   - `action` (Set of String) Allowed or denied actions.
-  - `ressource` (Set of String) Resource ARNs the statement applies to.
+  - `resource` (Set of String) Resource ARNs the statement applies to.
 - `version` (String) Policy version (2012-10-17).

@@ -10,7 +10,7 @@ resource "rustfs_policy" "readwrite" {
       "s3:DeleteObject",
       "s3:ListBucket",
     ]
-    ressource = [
+    resource = [
       "arn:aws:s3:::my-bucket",
       "arn:aws:s3:::my-bucket/*",
     ]
