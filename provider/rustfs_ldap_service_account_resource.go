@@ -16,21 +16,21 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &LDAPServiceAccountRessource{}
-	_ resource.ResourceWithImportState = &LDAPServiceAccountRessource{}
+	_ resource.Resource                = &LDAPServiceAccountResource{}
+	_ resource.ResourceWithImportState = &LDAPServiceAccountResource{}
 )
 
-// NewLDAPServiceAccountRessource is a helper function to simplify the provider implementation.
-func NewLDAPServiceAccountRessource() resource.Resource {
-	return &LDAPServiceAccountRessource{}
+// NewLDAPServiceAccountResource is a helper function to simplify the provider implementation.
+func NewLDAPServiceAccountResource() resource.Resource {
+	return &LDAPServiceAccountResource{}
 }
 
-// LDAPServiceAccountRessource is the resource implementation.
-type LDAPServiceAccountRessource struct {
+// LDAPServiceAccountResource is the resource implementation.
+type LDAPServiceAccountResource struct {
 	client *AllClient
 }
 
-type LDAPServiceAccountRessourceModel struct {
+type LDAPServiceAccountResourceModel struct {
 	AccessKey   types.String `tfsdk:"access_key"`
 	SecretKey   types.String `tfsdk:"secret_key"`
 	Name        types.String `tfsdk:"name"`
@@ -40,12 +40,12 @@ type LDAPServiceAccountRessourceModel struct {
 }
 
 // Metadata returns the resource type name.
-func (r *LDAPServiceAccountRessource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *LDAPServiceAccountResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_ldap_service_account"
 }
 
 // Schema defines the schema for the resource.
-func (r *LDAPServiceAccountRessource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *LDAPServiceAccountResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manage service accounts scoped to LDAP users",
 		MarkdownDescription: "Create a service account scoped to an LDAP user",
@@ -88,7 +88,7 @@ func (r *LDAPServiceAccountRessource) Schema(_ context.Context, _ resource.Schem
 	}
 }
 
-func (r *LDAPServiceAccountRessource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *LDAPServiceAccountResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -105,8 +105,8 @@ func (r *LDAPServiceAccountRessource) Configure(_ context.Context, req resource.
 }
 
 // Create creates the resource and sets the initial Terraform state.
-func (r *LDAPServiceAccountRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan LDAPServiceAccountRessourceModel
+func (r *LDAPServiceAccountResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan LDAPServiceAccountResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -134,8 +134,8 @@ func (r *LDAPServiceAccountRessource) Create(ctx context.Context, req resource.C
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *LDAPServiceAccountRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state LDAPServiceAccountRessourceModel
+func (r *LDAPServiceAccountResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state LDAPServiceAccountResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -172,8 +172,8 @@ func (r *LDAPServiceAccountRessource) Read(ctx context.Context, req resource.Rea
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *LDAPServiceAccountRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan LDAPServiceAccountRessourceModel
+func (r *LDAPServiceAccountResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan LDAPServiceAccountResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -203,8 +203,8 @@ func (r *LDAPServiceAccountRessource) Update(ctx context.Context, req resource.U
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
-func (r *LDAPServiceAccountRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data LDAPServiceAccountRessourceModel
+func (r *LDAPServiceAccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data LDAPServiceAccountResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -224,6 +224,6 @@ func (r *LDAPServiceAccountRessource) Delete(ctx context.Context, req resource.D
 	}
 }
 
-func (r *LDAPServiceAccountRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *LDAPServiceAccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("access_key"), req, resp)
 }

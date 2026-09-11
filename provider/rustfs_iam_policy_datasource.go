@@ -113,9 +113,9 @@ func (d *IAMPolicyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 		config.Statement = append(config.Statement, iamPolicyStatementDataSourceModel{
-			Effect:    types.StringValue(s.Effect),
-			Action:    actions,
-			Ressource: resources,
+			Effect:   types.StringValue(s.Effect),
+			Action:   actions,
+			Resource: resources,
 		})
 	}
 

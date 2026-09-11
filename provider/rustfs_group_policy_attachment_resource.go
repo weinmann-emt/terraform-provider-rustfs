@@ -15,29 +15,29 @@ import (
 )
 
 var (
-	_ resource.Resource                = &GroupPolicyAttachmentRessource{}
-	_ resource.ResourceWithImportState = &GroupPolicyAttachmentRessource{}
+	_ resource.Resource                = &GroupPolicyAttachmentResource{}
+	_ resource.ResourceWithImportState = &GroupPolicyAttachmentResource{}
 )
 
-type GroupPolicyAttachmentRessource struct {
+type GroupPolicyAttachmentResource struct {
 	client *AllClient
 }
 
-type GroupPolicyAttachmentRessourceModel struct {
+type GroupPolicyAttachmentResourceModel struct {
 	Group  types.String `tfsdk:"group"`
 	Policy types.String `tfsdk:"policy"`
 	ID     types.String `tfsdk:"id"`
 }
 
-func NewGroupPolicyAttachmentRessource() resource.Resource {
-	return &GroupPolicyAttachmentRessource{}
+func NewGroupPolicyAttachmentResource() resource.Resource {
+	return &GroupPolicyAttachmentResource{}
 }
 
-func (r *GroupPolicyAttachmentRessource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *GroupPolicyAttachmentResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_group_policy_attachment"
 }
 
-func (r *GroupPolicyAttachmentRessource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *GroupPolicyAttachmentResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Attach a canned IAM policy to an IAM group",
 		MarkdownDescription: "Attach a canned IAM policy to an IAM group and detach it on destroy",
@@ -64,7 +64,7 @@ func (r *GroupPolicyAttachmentRessource) Schema(_ context.Context, _ resource.Sc
 	}
 }
 
-func (r *GroupPolicyAttachmentRessource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *GroupPolicyAttachmentResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -79,8 +79,8 @@ func (r *GroupPolicyAttachmentRessource) Configure(_ context.Context, req resour
 	r.client = client
 }
 
-func (r *GroupPolicyAttachmentRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan GroupPolicyAttachmentRessourceModel
+func (r *GroupPolicyAttachmentResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan GroupPolicyAttachmentResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -100,8 +100,8 @@ func (r *GroupPolicyAttachmentRessource) Create(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
-func (r *GroupPolicyAttachmentRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state GroupPolicyAttachmentRessourceModel
+func (r *GroupPolicyAttachmentResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state GroupPolicyAttachmentResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -112,8 +112,8 @@ func (r *GroupPolicyAttachmentRessource) Read(ctx context.Context, req resource.
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
-func (r *GroupPolicyAttachmentRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan GroupPolicyAttachmentRessourceModel
+func (r *GroupPolicyAttachmentResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan GroupPolicyAttachmentResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -132,8 +132,8 @@ func (r *GroupPolicyAttachmentRessource) Update(ctx context.Context, req resourc
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
-func (r *GroupPolicyAttachmentRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data GroupPolicyAttachmentRessourceModel
+func (r *GroupPolicyAttachmentResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data GroupPolicyAttachmentResourceModel
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
 	if resp.Diagnostics.HasError() {
 		return
@@ -149,7 +149,7 @@ func (r *GroupPolicyAttachmentRessource) Delete(ctx context.Context, req resourc
 	}
 }
 
-func (r *GroupPolicyAttachmentRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *GroupPolicyAttachmentResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	parts := strings.Split(req.ID, "/")
 	if len(parts) != 2 || parts[0] == "" || parts[1] == "" {
 		resp.Diagnostics.AddError(

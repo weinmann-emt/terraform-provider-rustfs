@@ -16,17 +16,17 @@ import (
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &bucketRessource{}
-	_ resource.ResourceWithImportState = &bucketRessource{}
+	_ resource.Resource                = &bucketResource{}
+	_ resource.ResourceWithImportState = &bucketResource{}
 )
 
-// NewbucketRessource is a helper function to simplify the provider implementation.
-func NewBucketRessource() resource.Resource {
-	return &bucketRessource{}
+// NewbucketResource is a helper function to simplify the provider implementation.
+func NewBucketResource() resource.Resource {
+	return &bucketResource{}
 }
 
-// bucketRessource is the resource implementation.
-type bucketRessource struct {
+// bucketResource is the resource implementation.
+type bucketResource struct {
 	client *AllClient
 }
 
@@ -35,12 +35,12 @@ type bucketResourceModel struct {
 }
 
 // Metadata returns the resource type name.
-func (r *bucketRessource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *bucketResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_bucket"
 }
 
 // Schema defines the schema for the resource.
-func (r *bucketRessource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *bucketResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manage S3 buckets in rustfs",
 		MarkdownDescription: "Manage S3 buckets in rustfs",
@@ -56,7 +56,7 @@ func (r *bucketRessource) Schema(_ context.Context, _ resource.SchemaRequest, re
 	}
 }
 
-func (r *bucketRessource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *bucketResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -73,7 +73,7 @@ func (r *bucketRessource) Configure(_ context.Context, req resource.ConfigureReq
 }
 
 // Create creates the resource and sets the initial Terraform state.
-func (r *bucketRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *bucketResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	var plan bucketResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 
@@ -113,7 +113,7 @@ func (r *bucketRessource) Create(ctx context.Context, req resource.CreateRequest
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *bucketRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *bucketResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state bucketResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -133,7 +133,7 @@ func (r *bucketRessource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *bucketRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *bucketResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan bucketResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
@@ -149,7 +149,7 @@ func (r *bucketRessource) Update(ctx context.Context, req resource.UpdateRequest
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
-func (r *bucketRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *bucketResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data bucketResourceModel
 
 	// Read Terraform prior state data into the model
@@ -168,6 +168,6 @@ func (r *bucketRessource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 }
 
-func (r *bucketRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *bucketResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

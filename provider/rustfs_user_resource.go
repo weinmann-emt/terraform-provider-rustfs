@@ -16,15 +16,15 @@ import (
 )
 
 // Ensure provider defined types fully satisfy framework interfaces.
-var _ resource.Resource = &RustfsUserRessource{}
-var _ resource.ResourceWithImportState = &RustfsUserRessource{}
+var _ resource.Resource = &RustfsUserResource{}
+var _ resource.ResourceWithImportState = &RustfsUserResource{}
 
 // ExampleResource defines the resource implementation.
-type RustfsUserRessource struct {
+type RustfsUserResource struct {
 	client *AllClient
 }
 
-type RustfsUserRessourceModel struct {
+type RustfsUserResourceModel struct {
 	Name      types.String `tfsdk:"name"`
 	AccessKey types.String `tfsdk:"access_key"`
 	SecretKey types.String `tfsdk:"secret_key"`
@@ -32,14 +32,14 @@ type RustfsUserRessourceModel struct {
 	Policy    types.String `tfsdk:"policy"`
 }
 
-func NewUserRessource() resource.Resource {
-	return &RustfsUserRessource{}
+func NewUserResource() resource.Resource {
+	return &RustfsUserResource{}
 }
-func (r *RustfsUserRessource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *RustfsUserResource) Metadata(ctx context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_user"
 }
 
-func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *RustfsUserResource) Schema(ctx context.Context, req resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		// This description is used by the documentation generator and the language server.
 		MarkdownDescription: "Manage RustFS user",
@@ -77,7 +77,7 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 		},
 	}
 }
-func (r *RustfsUserRessource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *RustfsUserResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -94,9 +94,9 @@ func (r *RustfsUserRessource) Configure(_ context.Context, req resource.Configur
 	r.client = client
 
 }
-func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *RustfsUserResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
-	var plan RustfsUserRessourceModel
+	var plan RustfsUserResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 
 	resp.Diagnostics.Append(diags...)
@@ -125,8 +125,8 @@ func (r *RustfsUserRessource) Create(ctx context.Context, req resource.CreateReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
-func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state RustfsUserRessourceModel
+func (r *RustfsUserResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state RustfsUserResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -160,8 +160,8 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 		return
 	}
 }
-func (r *RustfsUserRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan, state RustfsUserRessourceModel
+func (r *RustfsUserResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan, state RustfsUserResourceModel
 	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
 	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
@@ -195,8 +195,8 @@ func (r *RustfsUserRessource) Update(ctx context.Context, req resource.UpdateReq
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
-func (r *RustfsUserRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data RustfsUserRessourceModel
+func (r *RustfsUserResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data RustfsUserResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -217,6 +217,6 @@ func (r *RustfsUserRessource) Delete(ctx context.Context, req resource.DeleteReq
 	}
 }
 
-func (r *RustfsUserRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *RustfsUserResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("access_key"), req, resp)
 }

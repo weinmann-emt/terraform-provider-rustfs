@@ -28,27 +28,27 @@ type serviceAccountResourceModel struct {
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &ServiceAccountRessource{}
-	_ resource.ResourceWithImportState = &ServiceAccountRessource{}
+	_ resource.Resource                = &ServiceAccountResource{}
+	_ resource.ResourceWithImportState = &ServiceAccountResource{}
 )
 
-// NewServiceAccountRessource is a helper function to simplify the provider implementation.
-func NewServiceAccountRessource() resource.Resource {
-	return &ServiceAccountRessource{}
+// NewServiceAccountResource is a helper function to simplify the provider implementation.
+func NewServiceAccountResource() resource.Resource {
+	return &ServiceAccountResource{}
 }
 
-// ServiceAccountRessource is the resource implementation.
-type ServiceAccountRessource struct {
+// ServiceAccountResource is the resource implementation.
+type ServiceAccountResource struct {
 	client *AllClient
 }
 
 // Metadata returns the resource type name.
-func (r *ServiceAccountRessource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *ServiceAccountResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_serviceaccount"
 }
 
 // Schema defines the schema for the resource.
-func (r *ServiceAccountRessource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *ServiceAccountResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manage ServiceUser/API Keys",
 		MarkdownDescription: "Manage ServiceUser/API Keys",
@@ -97,7 +97,7 @@ func (r *ServiceAccountRessource) Schema(_ context.Context, _ resource.SchemaReq
 	}
 }
 
-func (r *ServiceAccountRessource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *ServiceAccountResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -114,7 +114,7 @@ func (r *ServiceAccountRessource) Configure(_ context.Context, req resource.Conf
 }
 
 // Create creates the resource and sets the initial Terraform state.
-func (r *ServiceAccountRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *ServiceAccountResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var plan serviceAccountResourceModel
 	diags := req.Plan.Get(ctx, &plan)
@@ -148,7 +148,7 @@ func (r *ServiceAccountRessource) Create(ctx context.Context, req resource.Creat
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *ServiceAccountRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *ServiceAccountResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state serviceAccountResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -191,7 +191,7 @@ func (r *ServiceAccountRessource) Read(ctx context.Context, req resource.ReadReq
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *ServiceAccountRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *ServiceAccountResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan serviceAccountResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
@@ -232,7 +232,7 @@ func (r *ServiceAccountRessource) Update(ctx context.Context, req resource.Updat
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
-func (r *ServiceAccountRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *ServiceAccountResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data serviceAccountResourceModel
 
 	// Read Terraform prior state data into the model
@@ -256,6 +256,6 @@ func (r *ServiceAccountRessource) Delete(ctx context.Context, req resource.Delet
 	}
 }
 
-func (r *ServiceAccountRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *ServiceAccountResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("access_key"), req, resp)
 }
