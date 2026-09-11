@@ -16,6 +16,7 @@ type ServiceAccount struct {
 	ImpliedPolicy bool   `json:"impliedPolicy"`
 	Policy        string `json:"policy,omitempty"`
 	TargetUser    string `json:"targetUser,omitempty"`
+	ParentUser    string `json:"parentUser,omitempty"`
 }
 
 type ServiceAccountUpdate struct {
