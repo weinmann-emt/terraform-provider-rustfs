@@ -129,6 +129,7 @@ func (p *RustfsProvider) Resources(ctx context.Context) []func() resource.Resour
 		NewIamBackupImportResource,
 		NewBucketMetadataBackupImportResource,
 		NewGroupResource,
+		NewGroupPolicyAttachmentRessource,
 		NewBucketLifecycleConfigurationRessource,
 		NewTierResource,
 		NewBucketObjectLockResource,

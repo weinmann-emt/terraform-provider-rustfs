@@ -8,6 +8,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/planmodifier"
+	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringdefault"
 	"github.com/hashicorp/terraform-plugin-framework/resource/schema/stringplanmodifier"
 	"github.com/hashicorp/terraform-plugin-framework/types"
 	"github.com/hashicorp/terraform-plugin-log/tflog"
@@ -53,10 +54,12 @@ func (r *GroupResource) Schema(_ context.Context, _ resource.SchemaRequest, resp
 				Optional:    true,
 				Computed:    true,
 				Description: "Group status: enabled or disabled. Defaults to enabled.",
+				Default:     stringdefault.StaticString("enabled"),
 			},
 			"members": schema.SetAttribute{
 				ElementType: types.StringType,
 				Optional:    true,
+				Computed:    true,
 				Description: "Set of user access keys that are members of this group.",
 			},
 		},
@@ -86,9 +89,11 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 	}
 
 	var members []string
-	resp.Diagnostics.Append(plan.Members.ElementsAs(ctx, &members, false)...)
-	if resp.Diagnostics.HasError() {
-		return
+	if !plan.Members.IsUnknown() && !plan.Members.IsNull() {
+		resp.Diagnostics.Append(plan.Members.ElementsAs(ctx, &members, false)...)
+		if resp.Diagnostics.HasError() {
+			return
+		}
 	}
 
 	status := plan.Status.ValueString()
@@ -96,20 +101,20 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		status = "enabled"
 	}
 
-	if len(members) > 0 {
-		err := r.client.RustClient.UpdateGroupMembers(rustfs.GroupAddRemove{
-			Group:    plan.Name.ValueString(),
-			Members:  members,
-			IsRemove: false,
-			Status:   status,
-		})
-		if err != nil {
-			resp.Diagnostics.AddError(
-				"Error creating group",
-				"Could not create group: "+err.Error(),
-			)
-			return
-		}
+	// The admin API creates a group implicitly via update-group-members, so it
+	// must always be called (even with zero members) to make the group exist.
+	err := r.client.RustClient.UpdateGroupMembers(rustfs.GroupAddRemove{
+		Group:    plan.Name.ValueString(),
+		Members:  members,
+		IsRemove: false,
+		Status:   status,
+	})
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error creating group",
+			"Could not create group: "+err.Error(),
+		)
+		return
 	}
 
 	if status != "enabled" {
@@ -122,6 +127,12 @@ func (r *GroupResource) Create(ctx context.Context, req resource.CreateRequest, 
 		}
 	}
 
+	membersValue, diags := types.SetValueFrom(ctx, types.StringType, members)
+	resp.Diagnostics.Append(diags...)
+	if resp.Diagnostics.HasError() {
+		return
+	}
+	plan.Members = membersValue
 	plan.Status = types.StringValue(status)
 	tflog.Trace(ctx, "created group resource")
 	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)

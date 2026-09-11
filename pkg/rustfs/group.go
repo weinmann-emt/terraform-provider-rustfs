@@ -10,13 +10,14 @@ type GroupInfo struct {
 	Name    string   `json:"name"`
 	Status  string   `json:"status"`
 	Members []string `json:"members"`
+	Policy  string   `json:"policy"`
 }
 
 type GroupAddRemove struct {
 	Group    string   `json:"group"`
 	Members  []string `json:"members"`
-	IsRemove bool     `json:"is_remove"`
-	Status   string   `json:"status"`
+	IsRemove bool     `json:"isRemove"`
+	Status   string   `json:"groupStatus"`
 }
 
 func (c *RustfsAdmin) GetGroup(name string) (GroupInfo, error) {
@@ -40,6 +41,9 @@ func (c *RustfsAdmin) GetGroup(name string) (GroupInfo, error) {
 }
 
 func (c *RustfsAdmin) UpdateGroupMembers(req GroupAddRemove) error {
+	if req.Members == nil {
+		req.Members = []string{}
+	}
 	bytes, err := json.Marshal(req)
 	if err != nil {
 		return err
