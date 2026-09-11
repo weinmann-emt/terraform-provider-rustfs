@@ -86,32 +86,32 @@ func quotaSetWithRetry(ctx context.Context, quota rustfs.Quota, set func(rustfs.
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &quotaRessource{}
-	_ resource.ResourceWithImportState = &quotaRessource{}
+	_ resource.Resource                = &quotaResource{}
+	_ resource.ResourceWithImportState = &quotaResource{}
 )
 
-// NewquotaRessource is a helper function to simplify the provider implementation.
-func NewquotaRessource() resource.Resource {
-	return &quotaRessource{}
+// NewquotaResource is a helper function to simplify the provider implementation.
+func NewquotaResource() resource.Resource {
+	return &quotaResource{}
 }
 
-// quotaRessource is the resource implementation.
-type quotaRessource struct {
+// quotaResource is the resource implementation.
+type quotaResource struct {
 	client *AllClient
 }
 
-type quotaRessourceModel struct {
+type quotaResourceModel struct {
 	Bucket types.String `tfsdk:"bucket"`
 	Quota  types.Int64  `tfsdk:"quota"`
 }
 
 // Metadata returns the resource type name.
-func (r *quotaRessource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *quotaResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_quota"
 }
 
 // Schema defines the schema for the resource.
-func (r *quotaRessource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *quotaResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manage buckets quota in rustfs",
 		MarkdownDescription: "Manage bucket quota in rustfs",
@@ -128,7 +128,7 @@ func (r *quotaRessource) Schema(_ context.Context, _ resource.SchemaRequest, res
 	}
 }
 
-func (r *quotaRessource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *quotaResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -145,8 +145,8 @@ func (r *quotaRessource) Configure(_ context.Context, req resource.ConfigureRequ
 }
 
 // Create creates the resource and sets the initial Terraform state.
-func (r *quotaRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
-	var plan quotaRessourceModel
+func (r *quotaResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+	var plan quotaResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	// ToDo: Check if bucket exists
 	resp.Diagnostics.Append(diags...)
@@ -167,8 +167,8 @@ func (r *quotaRessource) Create(ctx context.Context, req resource.CreateRequest,
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *quotaRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
-	var state quotaRessourceModel
+func (r *quotaResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+	var state quotaResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -197,8 +197,8 @@ func (r *quotaRessource) Read(ctx context.Context, req resource.ReadRequest, res
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *quotaRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan quotaRessourceModel
+func (r *quotaResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+	var plan quotaResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
@@ -223,8 +223,8 @@ func (r *quotaRessource) Update(ctx context.Context, req resource.UpdateRequest,
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
-func (r *quotaRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
-	var data quotaRessourceModel
+func (r *quotaResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+	var data quotaResourceModel
 
 	// Read Terraform prior state data into the model
 	resp.Diagnostics.Append(req.State.Get(ctx, &data)...)
@@ -242,6 +242,6 @@ func (r *quotaRessource) Delete(ctx context.Context, req resource.DeleteRequest,
 	}
 }
 
-func (r *quotaRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *quotaResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("bucket"), req, resp)
 }

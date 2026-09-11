@@ -34,7 +34,7 @@ Required:
 
 Optional:
 
-- `ressource` (List of String)
+- `resource` (List of String)
 
 ## Import
 

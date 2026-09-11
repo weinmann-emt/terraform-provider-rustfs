@@ -45,7 +45,7 @@ resource "rustfs_policy" "test" {
   statement = [{
     effect    = "Allow"
     action    = ["s3:GetObject", "s3:ListBucket"]
-    ressource = ["arn:aws:s3:::*"]
+    resource = ["arn:aws:s3:::*"]
   }]
 }
 `, name)

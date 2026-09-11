@@ -15,9 +15,9 @@ import (
 
 // Data models.
 type policyStatementModel struct {
-	Effect    string   `tfsdk:"effect"`
-	Action    []string `tfsdk:"action"`
-	Ressource []string `tfsdk:"ressource"`
+	Effect   string   `tfsdk:"effect"`
+	Action   []string `tfsdk:"action"`
+	Resource []string `tfsdk:"resource"`
 }
 
 type policyResourceModel struct {
@@ -28,27 +28,27 @@ type policyResourceModel struct {
 
 // Ensure the implementation satisfies the expected interfaces.
 var (
-	_ resource.Resource                = &PolicyRessource{}
-	_ resource.ResourceWithImportState = &PolicyRessource{}
+	_ resource.Resource                = &PolicyResource{}
+	_ resource.ResourceWithImportState = &PolicyResource{}
 )
 
-// NewPolicyRessource is a helper function to simplify the provider implementation.
-func NewPolicyRessource() resource.Resource {
-	return &PolicyRessource{}
+// NewPolicyResource is a helper function to simplify the provider implementation.
+func NewPolicyResource() resource.Resource {
+	return &PolicyResource{}
 }
 
-// PolicyRessource is the resource implementation.
-type PolicyRessource struct {
+// PolicyResource is the resource implementation.
+type PolicyResource struct {
 	client *AllClient
 }
 
 // Metadata returns the resource type name.
-func (r *PolicyRessource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
+func (r *PolicyResource) Metadata(_ context.Context, req resource.MetadataRequest, resp *resource.MetadataResponse) {
 	resp.TypeName = req.ProviderTypeName + "_policy"
 }
 
 // Schema defines the schema for the resource.
-func (r *PolicyRessource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
+func (r *PolicyResource) Schema(_ context.Context, _ resource.SchemaRequest, resp *resource.SchemaResponse) {
 	resp.Schema = schema.Schema{
 		Description:         "Manage S3 policies",
 		MarkdownDescription: "Manage S3 policies",
@@ -72,7 +72,7 @@ func (r *PolicyRessource) Schema(_ context.Context, _ resource.SchemaRequest, re
 							ElementType: types.StringType,
 							Required:    true,
 						},
-						"ressource": schema.SetAttribute{
+						"resource": schema.SetAttribute{
 							ElementType: types.StringType,
 							Optional:    true,
 						},
@@ -83,7 +83,7 @@ func (r *PolicyRessource) Schema(_ context.Context, _ resource.SchemaRequest, re
 	}
 }
 
-func (r *PolicyRessource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
+func (r *PolicyResource) Configure(_ context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
 	if req.ProviderData == nil {
 		return
 	}
@@ -100,7 +100,7 @@ func (r *PolicyRessource) Configure(_ context.Context, req resource.ConfigureReq
 }
 
 // Create creates the resource and sets the initial Terraform state.
-func (r *PolicyRessource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
+func (r *PolicyResource) Create(ctx context.Context, req resource.CreateRequest, resp *resource.CreateResponse) {
 	// Retrieve values from plan
 	var plan policyResourceModel
 	diags := req.Plan.Get(ctx, &plan)
@@ -116,7 +116,7 @@ func (r *PolicyRessource) Create(ctx context.Context, req resource.CreateRequest
 			rustfs.PolicyStatement{
 				Effect:   i.Effect,
 				Action:   i.Action,
-				Resource: i.Ressource,
+				Resource: i.Resource,
 			},
 		)
 	}
@@ -139,7 +139,7 @@ func (r *PolicyRessource) Create(ctx context.Context, req resource.CreateRequest
 }
 
 // Read refreshes the Terraform state with the latest data.
-func (r *PolicyRessource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
+func (r *PolicyResource) Read(ctx context.Context, req resource.ReadRequest, resp *resource.ReadResponse) {
 	var state policyResourceModel
 	diags := req.State.Get(ctx, &state)
 	resp.Diagnostics.Append(diags...)
@@ -169,9 +169,9 @@ func (r *PolicyRessource) Read(ctx context.Context, req resource.ReadRequest, re
 	for _, read_statement := range actual.Statement {
 		state.Statement = append(state.Statement,
 			policyStatementModel{
-				Effect:    read_statement.Effect,
-				Action:    read_statement.Action,
-				Ressource: read_statement.Resource,
+				Effect:   read_statement.Effect,
+				Action:   read_statement.Action,
+				Resource: read_statement.Resource,
 			},
 		)
 	}
@@ -183,7 +183,7 @@ func (r *PolicyRessource) Read(ctx context.Context, req resource.ReadRequest, re
 }
 
 // Update updates the resource and sets the updated Terraform state on success.
-func (r *PolicyRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
+func (r *PolicyResource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
 	var plan policyResourceModel
 	diags := req.Plan.Get(ctx, &plan)
 	resp.Diagnostics.Append(diags...)
@@ -197,7 +197,7 @@ func (r *PolicyRessource) Update(ctx context.Context, req resource.UpdateRequest
 			rustfs.PolicyStatement{
 				Effect:   i.Effect,
 				Action:   i.Action,
-				Resource: i.Ressource,
+				Resource: i.Resource,
 			},
 		)
 	}
@@ -223,7 +223,7 @@ func (r *PolicyRessource) Update(ctx context.Context, req resource.UpdateRequest
 }
 
 // Delete deletes the resource and removes the Terraform state on success.
-func (r *PolicyRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
+func (r *PolicyResource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {
 	var data policyResourceModel
 
 	// Read Terraform prior state data into the model
@@ -243,6 +243,6 @@ func (r *PolicyRessource) Delete(ctx context.Context, req resource.DeleteRequest
 	}
 }
 
-func (r *PolicyRessource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
+func (r *PolicyResource) ImportState(ctx context.Context, req resource.ImportStateRequest, resp *resource.ImportStateResponse) {
 	resource.ImportStatePassthroughID(ctx, path.Root("name"), req, resp)
 }

@@ -16,9 +16,9 @@ type IAMPolicyDataSource struct {
 }
 
 type iamPolicyStatementDataSourceModel struct {
-	Effect    types.String `tfsdk:"effect"`
-	Action    types.Set    `tfsdk:"action"`
-	Ressource types.Set    `tfsdk:"ressource"`
+	Effect   types.String `tfsdk:"effect"`
+	Action   types.Set    `tfsdk:"action"`
+	Resource types.Set    `tfsdk:"resource"`
 }
 
 type IAMPolicyDataSourceModel struct {
@@ -59,7 +59,7 @@ func (d *IAMPolicyDataSource) Schema(_ context.Context, _ datasource.SchemaReque
 							Computed:    true,
 							ElementType: types.StringType,
 						},
-						"ressource": schema.SetAttribute{
+						"resource": schema.SetAttribute{
 							Computed:    true,
 							ElementType: types.StringType,
 						},
@@ -113,9 +113,9 @@ func (d *IAMPolicyDataSource) Read(ctx context.Context, req datasource.ReadReque
 			return
 		}
 		config.Statement = append(config.Statement, iamPolicyStatementDataSourceModel{
-			Effect:    types.StringValue(s.Effect),
-			Action:    actions,
-			Ressource: resources,
+			Effect:   types.StringValue(s.Effect),
+			Action:   actions,
+			Resource: resources,
 		})
 	}
 

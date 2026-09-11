@@ -83,7 +83,7 @@ resource "rustfs_policy" "readwrite" {
   statement = [{
     effect    = "Allow"
     action    = ["s3:GetObject", "s3:PutObject", "s3:ListBucket"]
-    ressource = ["arn:aws:s3:::my-bucket", "arn:aws:s3:::my-bucket/*"]
+    resource = ["arn:aws:s3:::my-bucket", "arn:aws:s3:::my-bucket/*"]
   }]
 }
 
