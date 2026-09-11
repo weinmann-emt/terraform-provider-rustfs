@@ -58,11 +58,8 @@ func (r *RustfsUserRessource) Schema(ctx context.Context, req resource.SchemaReq
 				},
 			},
 			"secret_key": schema.StringAttribute{
-				MarkdownDescription: "Secret Key",
+				MarkdownDescription: "Secret Key. Changing this rotates the secret in place.",
 				Required:            true,
-				PlanModifiers: []planmodifier.String{
-					stringplanmodifier.RequiresReplace(),
-				},
 			},
 			"status": schema.StringAttribute{
 				Optional:            true,
@@ -164,34 +161,38 @@ func (r *RustfsUserRessource) Read(ctx context.Context, req resource.ReadRequest
 	}
 }
 func (r *RustfsUserRessource) Update(ctx context.Context, req resource.UpdateRequest, resp *resource.UpdateResponse) {
-	var plan RustfsUserRessourceModel
-	diags := req.Plan.Get(ctx, &plan)
-	resp.Diagnostics.Append(diags...)
+	var plan, state RustfsUserRessourceModel
+	resp.Diagnostics.Append(req.Plan.Get(ctx, &plan)...)
+	resp.Diagnostics.Append(req.State.Get(ctx, &state)...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	account := rustfs.UserAccount{
-		AccessKey: plan.AccessKey.ValueString(),
-		SecretKey: plan.SecretKey.ValueString(),
-		Policy:    plan.Policy.ValueString(),
-		Status:    plan.Status.ValueString(),
+	if !plan.SecretKey.Equal(state.SecretKey) {
+		if err := r.client.RustClient.SetUserSecretKey(
+			plan.AccessKey.ValueString(),
+			plan.SecretKey.ValueString(),
+		); err != nil {
+			resp.Diagnostics.AddError("Error updating user secret", err.Error())
+			return
+		}
 	}
 
-	err := r.client.RustClient.UpdateUserAccount(account)
-	if err != nil {
-		resp.Diagnostics.AddError(
-			"Error updating user",
-			"Could not update user, unexpected error: "+err.Error(),
-		)
-		return
+	if plan.Status.ValueString() != state.Status.ValueString() {
+		if err := r.client.RustClient.SetUserStatus(
+			plan.AccessKey.ValueString(),
+			plan.Status.ValueString(),
+		); err != nil {
+			resp.Diagnostics.AddError("Error updating user status", err.Error())
+			return
+		}
 	}
 
-	diags = resp.State.Set(ctx, plan)
-	resp.Diagnostics.Append(diags...)
-	if resp.Diagnostics.HasError() {
-		return
+	if plan.Name.IsNull() || plan.Name.ValueString() == "" {
+		plan.Name = types.StringValue(plan.AccessKey.ValueString())
 	}
+
+	resp.Diagnostics.Append(resp.State.Set(ctx, &plan)...)
 }
 
 func (r *RustfsUserRessource) Delete(ctx context.Context, req resource.DeleteRequest, resp *resource.DeleteResponse) {

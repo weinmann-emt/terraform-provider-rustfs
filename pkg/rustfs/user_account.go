@@ -41,7 +41,7 @@ func (c *RustfsAdmin) CreateUserAccount(user UserAccount) error {
 	}
 
 	if user.Policy != "" {
-		return c.addUserToGroup(user.AccessKey, user.Policy)
+		return c.AttachPolicyToUser(user.AccessKey, user.Policy)
 	}
 	return err
 }
@@ -83,7 +83,7 @@ func (c *RustfsAdmin) UpdateUserAccount(account UserAccount) error {
 		return err
 	}
 	if account.Policy != "" {
-		return c.addUserToGroup(account.AccessKey, account.Policy)
+		return c.AttachPolicyToUser(account.AccessKey, account.Policy)
 	}
 	return nil
 }
@@ -105,14 +105,54 @@ func (c *RustfsAdmin) DeleteUserAccount(account UserAccount) error {
 	return err
 }
 
-func (c *RustfsAdmin) addUserToGroup(user string, group string) error {
+// AttachPolicyToUser attaches a policy to an existing user.
+func (c *RustfsAdmin) AttachPolicyToUser(user string, policy string) error {
 	urlValues := make(url.Values)
 	urlValues.Set("userOrGroup", user)
-	urlValues.Set("policyName", group)
+	urlValues.Set("policyName", policy)
 	urlValues.Set("isGroup", "false")
 	req_data := RequestData{
 		Method:      "PUT",
 		RelPath:     "set-user-or-group-policy",
+		QueryValues: urlValues,
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	_, err := c.doRequest(ctx, req_data)
+	return err
+}
+
+// SetUserSecretKey rotates the user's secret key in place.
+func (c *RustfsAdmin) SetUserSecretKey(accessKey, secretKey string) error {
+	urlValues := make(url.Values)
+	urlValues.Set("accessKey", accessKey)
+	body := struct {
+		SecretKey string `json:"secret_key"`
+	}{SecretKey: secretKey}
+	bytes, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	req_data := RequestData{
+		Method:      "PUT",
+		RelPath:     "set-user-secret-key",
+		Content:     bytes,
+		QueryValues: urlValues,
+	}
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	_, err = c.doRequest(ctx, req_data)
+	return err
+}
+
+// SetUserStatus enables or disables an existing user.
+func (c *RustfsAdmin) SetUserStatus(accessKey, status string) error {
+	urlValues := make(url.Values)
+	urlValues.Set("accessKey", accessKey)
+	urlValues.Set("status", status)
+	req_data := RequestData{
+		Method:      "PUT",
+		RelPath:     "set-user-status",
 		QueryValues: urlValues,
 	}
 	ctx, cancel := context.WithCancel(context.Background())

@@ -21,10 +21,25 @@ func TestAccUserResource_basic(t *testing.T) {
 		CheckDestroy:             testAccCheckUserDestroy,
 		Steps: []resource.TestStep{
 			{
-				Config: testAccUserConfig(accessKey),
+				Config: testAccUserConfig(accessKey, "superSecret123!", "enabled"),
 				Check: resource.ComposeTestCheckFunc(
 					testAccCheckUserExists(resourceName, "enabled"),
 					resource.TestCheckResourceAttr(resourceName, "access_key", accessKey),
+					resource.TestCheckResourceAttr(resourceName, "status", "enabled"),
+				),
+			},
+			{
+				Config: testAccUserConfig(accessKey, "rotatedSecret456!", "disabled"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUserExists(resourceName, "disabled"),
+					resource.TestCheckResourceAttr(resourceName, "secret_key", "rotatedSecret456!"),
+					resource.TestCheckResourceAttr(resourceName, "status", "disabled"),
+				),
+			},
+			{
+				Config: testAccUserConfig(accessKey, "rotatedSecret456!", "enabled"),
+				Check: resource.ComposeTestCheckFunc(
+					testAccCheckUserExists(resourceName, "enabled"),
 					resource.TestCheckResourceAttr(resourceName, "status", "enabled"),
 				),
 			},
@@ -40,15 +55,15 @@ func TestAccUserResource_basic(t *testing.T) {
 	})
 }
 
-func testAccUserConfig(accessKey string) string {
+func testAccUserConfig(accessKey, secretKey, status string) string {
 	return testAccProviderConfig() + fmt.Sprintf(`
 resource "rustfs_user" "test" {
   access_key = "%s"
-  secret_key = "superSecret123!"
-  status     = "enabled"
+  secret_key = "%s"
+  status     = "%s"
   policy     = ""
 }
-`, accessKey)
+`, accessKey, secretKey, status)
 }
 
 func testAccCheckUserExists(n string, expectedStatus string) resource.TestCheckFunc {
