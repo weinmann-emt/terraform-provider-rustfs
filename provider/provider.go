@@ -123,6 +123,7 @@ func (p *RustfsProvider) Resources(ctx context.Context) []func() resource.Resour
 	return []func() resource.Resource{
 		NewUserRessource,
 		NewPolicyRessource,
+		NewUserPolicyAttachmentRessource,
 		NewServiceAccountRessource,
 		NewLDAPServiceAccountRessource,
 		NewBucketRessource,
