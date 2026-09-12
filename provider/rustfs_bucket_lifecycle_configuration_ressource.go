@@ -38,10 +38,14 @@ type bucketLifecycleConfigurationModel struct {
 }
 
 type ruleModel struct {
-	Id         types.String     `tfsdk:"id"`
-	Status     types.String     `tfsdk:"status"`
-	Filter     *filterModel     `tfsdk:"filter"`
-	Expiration *expirationModel `tfsdk:"expiration"`
+	Id                             types.String                         `tfsdk:"id"`
+	Status                         types.String                         `tfsdk:"status"`
+	Filter                         *filterModel                         `tfsdk:"filter"`
+	Expiration                     *expirationModel                     `tfsdk:"expiration"`
+	Transition                     *transitionModel                     `tfsdk:"transition"`
+	NoncurrentVersionExpiration    *noncurrentVersionExpirationModel    `tfsdk:"noncurrent_version_expiration"`
+	NoncurrentVersionTransition    *noncurrentVersionTransitionModel    `tfsdk:"noncurrent_version_transition"`
+	AbortIncompleteMultipartUpload *abortIncompleteMultipartUploadModel `tfsdk:"abort_incomplete_multipart_upload"`
 }
 
 type filterModel struct {
@@ -49,7 +53,28 @@ type filterModel struct {
 }
 
 type expirationModel struct {
-	Days types.Int64 `tfsdk:"days"`
+	Days                      types.Int64  `tfsdk:"days"`
+	Date                      types.String `tfsdk:"date"`
+	ExpiredObjectDeleteMarker types.Bool   `tfsdk:"expired_object_delete_marker"`
+}
+
+type transitionModel struct {
+	Days         types.Int64  `tfsdk:"days"`
+	Date         types.String `tfsdk:"date"`
+	StorageClass types.String `tfsdk:"storage_class"`
+}
+
+type noncurrentVersionExpirationModel struct {
+	NoncurrentDays types.Int64 `tfsdk:"noncurrent_days"`
+}
+
+type noncurrentVersionTransitionModel struct {
+	NoncurrentDays types.Int64  `tfsdk:"noncurrent_days"`
+	StorageClass   types.String `tfsdk:"storage_class"`
+}
+
+type abortIncompleteMultipartUploadModel struct {
+	DaysAfterInitiation types.Int64 `tfsdk:"days_after_initiation"`
 }
 
 // Metadata returns the resource type name.
@@ -112,6 +137,62 @@ func (r *bucketLifecycleConfigurationRessource) Schema(_ context.Context, _ reso
 									Optional:    true,
 									Description: "Lifetime of the objects in days",
 								},
+								"date": schema.StringAttribute{
+									Optional:    true,
+									Description: "Date at which the objects expire (ISO8601, e.g. 2026-12-31T00:00:00Z)",
+								},
+								"expired_object_delete_marker": schema.BoolAttribute{
+									Optional:    true,
+									Description: "Whether to remove the delete marker of expired objects with no versions",
+								},
+							},
+						},
+						"transition": schema.SingleNestedBlock{
+							Description: "Configuration block for transitioning objects to an ILM tier",
+							Attributes: map[string]schema.Attribute{
+								"days": schema.Int64Attribute{
+									Optional:    true,
+									Description: "Lifetime of the objects in days before transition",
+								},
+								"date": schema.StringAttribute{
+									Optional:    true,
+									Description: "Date at which the objects are transitioned (ISO8601, e.g. 2026-12-31T00:00:00Z)",
+								},
+								"storage_class": schema.StringAttribute{
+									Optional:    true,
+									Description: "Name of the RustFS ILM tier to transition objects to",
+								},
+							},
+						},
+						"noncurrent_version_expiration": schema.SingleNestedBlock{
+							Description: "Configuration block for expiring noncurrent object versions",
+							Attributes: map[string]schema.Attribute{
+								"noncurrent_days": schema.Int64Attribute{
+									Optional:    true,
+									Description: "Number of days an object is noncurrent before it expires",
+								},
+							},
+						},
+						"noncurrent_version_transition": schema.SingleNestedBlock{
+							Description: "Configuration block for transitioning noncurrent object versions to an ILM tier",
+							Attributes: map[string]schema.Attribute{
+								"noncurrent_days": schema.Int64Attribute{
+									Optional:    true,
+									Description: "Number of days an object is noncurrent before it is transitioned",
+								},
+								"storage_class": schema.StringAttribute{
+									Optional:    true,
+									Description: "Name of the RustFS ILM tier to transition noncurrent versions to",
+								},
+							},
+						},
+						"abort_incomplete_multipart_upload": schema.SingleNestedBlock{
+							Description: "Configuration block for aborting incomplete multipart uploads",
+							Attributes: map[string]schema.Attribute{
+								"days_after_initiation": schema.Int64Attribute{
+									Optional:    true,
+									Description: "Number of days after multipart upload initiation before the upload is aborted",
+								},
 							},
 						},
 					},
@@ -160,10 +241,58 @@ func (r *bucketLifecycleConfigurationRessource) Create(ctx context.Context, req 
 		}
 
 		if rulePlan.Expiration != nil {
-			daysVal := int(rulePlan.Expiration.Days.ValueInt64())
-			rule.Expiration = &rustfs.LifecycleExpiration{
-				Days: &daysVal,
+			exp := &rustfs.LifecycleExpiration{}
+			if !rulePlan.Expiration.Days.IsNull() {
+				daysVal := int(rulePlan.Expiration.Days.ValueInt64())
+				exp.Days = &daysVal
 			}
+			if !rulePlan.Expiration.Date.IsNull() {
+				exp.Date = rulePlan.Expiration.Date.ValueString()
+			}
+			if !rulePlan.Expiration.ExpiredObjectDeleteMarker.IsNull() {
+				marker := rulePlan.Expiration.ExpiredObjectDeleteMarker.ValueBool()
+				exp.ExpiredObjectDeleteMarker = &marker
+			}
+			rule.Expiration = exp
+		}
+
+		if rulePlan.Transition != nil {
+			tr := &rustfs.LifecycleTransition{StorageClass: rulePlan.Transition.StorageClass.ValueString()}
+			if !rulePlan.Transition.Days.IsNull() {
+				daysVal := int(rulePlan.Transition.Days.ValueInt64())
+				tr.Days = &daysVal
+			}
+			if !rulePlan.Transition.Date.IsNull() {
+				tr.Date = rulePlan.Transition.Date.ValueString()
+			}
+			rule.Transition = tr
+		}
+
+		if rulePlan.NoncurrentVersionExpiration != nil {
+			ncExp := &rustfs.LifecycleNoncurrentVersionExpiration{}
+			if !rulePlan.NoncurrentVersionExpiration.NoncurrentDays.IsNull() {
+				daysVal := int(rulePlan.NoncurrentVersionExpiration.NoncurrentDays.ValueInt64())
+				ncExp.NoncurrentDays = &daysVal
+			}
+			rule.NoncurrentVersionExpiration = ncExp
+		}
+
+		if rulePlan.NoncurrentVersionTransition != nil {
+			ncTr := &rustfs.LifecycleNoncurrentVersionTransition{StorageClass: rulePlan.NoncurrentVersionTransition.StorageClass.ValueString()}
+			if !rulePlan.NoncurrentVersionTransition.NoncurrentDays.IsNull() {
+				daysVal := int(rulePlan.NoncurrentVersionTransition.NoncurrentDays.ValueInt64())
+				ncTr.NoncurrentDays = &daysVal
+			}
+			rule.NoncurrentVersionTransition = ncTr
+		}
+
+		if rulePlan.AbortIncompleteMultipartUpload != nil {
+			abort := &rustfs.LifecycleAbortIncompleteMultipartUpload{}
+			if !rulePlan.AbortIncompleteMultipartUpload.DaysAfterInitiation.IsNull() {
+				daysVal := int(rulePlan.AbortIncompleteMultipartUpload.DaysAfterInitiation.ValueInt64())
+				abort.DaysAfterInitiation = &daysVal
+			}
+			rule.AbortIncompleteMultipartUpload = abort
 		}
 
 		rules = append(rules, rule)
@@ -225,10 +354,53 @@ func (r *bucketLifecycleConfigurationRessource) Read(ctx context.Context, req re
 			}
 		}
 
-		if ruleAPI.Expiration != nil && *ruleAPI.Expiration.Days != 0 {
-			rm.Expiration = &expirationModel{
-				Days: types.Int64Value(int64(*ruleAPI.Expiration.Days)),
+		if ruleAPI.Expiration != nil {
+			exp := &expirationModel{}
+			if ruleAPI.Expiration.Days != nil {
+				exp.Days = types.Int64Value(int64(*ruleAPI.Expiration.Days))
 			}
+			if ruleAPI.Expiration.Date != "" {
+				exp.Date = types.StringValue(ruleAPI.Expiration.Date)
+			}
+			if ruleAPI.Expiration.ExpiredObjectDeleteMarker != nil {
+				exp.ExpiredObjectDeleteMarker = types.BoolValue(*ruleAPI.Expiration.ExpiredObjectDeleteMarker)
+			}
+			rm.Expiration = exp
+		}
+
+		if ruleAPI.Transition != nil {
+			tr := &transitionModel{StorageClass: types.StringValue(ruleAPI.Transition.StorageClass)}
+			if ruleAPI.Transition.Days != nil {
+				tr.Days = types.Int64Value(int64(*ruleAPI.Transition.Days))
+			}
+			if ruleAPI.Transition.Date != "" {
+				tr.Date = types.StringValue(ruleAPI.Transition.Date)
+			}
+			rm.Transition = tr
+		}
+
+		if ruleAPI.NoncurrentVersionExpiration != nil {
+			ncExp := &noncurrentVersionExpirationModel{}
+			if ruleAPI.NoncurrentVersionExpiration.NoncurrentDays != nil {
+				ncExp.NoncurrentDays = types.Int64Value(int64(*ruleAPI.NoncurrentVersionExpiration.NoncurrentDays))
+			}
+			rm.NoncurrentVersionExpiration = ncExp
+		}
+
+		if ruleAPI.NoncurrentVersionTransition != nil {
+			ncTr := &noncurrentVersionTransitionModel{StorageClass: types.StringValue(ruleAPI.NoncurrentVersionTransition.StorageClass)}
+			if ruleAPI.NoncurrentVersionTransition.NoncurrentDays != nil {
+				ncTr.NoncurrentDays = types.Int64Value(int64(*ruleAPI.NoncurrentVersionTransition.NoncurrentDays))
+			}
+			rm.NoncurrentVersionTransition = ncTr
+		}
+
+		if ruleAPI.AbortIncompleteMultipartUpload != nil {
+			abort := &abortIncompleteMultipartUploadModel{}
+			if ruleAPI.AbortIncompleteMultipartUpload.DaysAfterInitiation != nil {
+				abort.DaysAfterInitiation = types.Int64Value(int64(*ruleAPI.AbortIncompleteMultipartUpload.DaysAfterInitiation))
+			}
+			rm.AbortIncompleteMultipartUpload = abort
 		}
 
 		state.Rule = append(state.Rule, rm)
@@ -261,10 +433,58 @@ func (r *bucketLifecycleConfigurationRessource) Update(ctx context.Context, req 
 		}
 
 		if rulePlan.Expiration != nil {
-			daysVal := int(*rulePlan.Expiration.Days.ValueInt64Pointer())
-			rule.Expiration = &rustfs.LifecycleExpiration{
-				Days: &daysVal,
+			exp := &rustfs.LifecycleExpiration{}
+			if !rulePlan.Expiration.Days.IsNull() {
+				daysVal := int(*rulePlan.Expiration.Days.ValueInt64Pointer())
+				exp.Days = &daysVal
 			}
+			if !rulePlan.Expiration.Date.IsNull() {
+				exp.Date = rulePlan.Expiration.Date.ValueString()
+			}
+			if !rulePlan.Expiration.ExpiredObjectDeleteMarker.IsNull() {
+				marker := rulePlan.Expiration.ExpiredObjectDeleteMarker.ValueBool()
+				exp.ExpiredObjectDeleteMarker = &marker
+			}
+			rule.Expiration = exp
+		}
+
+		if rulePlan.Transition != nil {
+			tr := &rustfs.LifecycleTransition{StorageClass: rulePlan.Transition.StorageClass.ValueString()}
+			if !rulePlan.Transition.Days.IsNull() {
+				daysVal := int(*rulePlan.Transition.Days.ValueInt64Pointer())
+				tr.Days = &daysVal
+			}
+			if !rulePlan.Transition.Date.IsNull() {
+				tr.Date = rulePlan.Transition.Date.ValueString()
+			}
+			rule.Transition = tr
+		}
+
+		if rulePlan.NoncurrentVersionExpiration != nil {
+			ncExp := &rustfs.LifecycleNoncurrentVersionExpiration{}
+			if !rulePlan.NoncurrentVersionExpiration.NoncurrentDays.IsNull() {
+				daysVal := int(*rulePlan.NoncurrentVersionExpiration.NoncurrentDays.ValueInt64Pointer())
+				ncExp.NoncurrentDays = &daysVal
+			}
+			rule.NoncurrentVersionExpiration = ncExp
+		}
+
+		if rulePlan.NoncurrentVersionTransition != nil {
+			ncTr := &rustfs.LifecycleNoncurrentVersionTransition{StorageClass: rulePlan.NoncurrentVersionTransition.StorageClass.ValueString()}
+			if !rulePlan.NoncurrentVersionTransition.NoncurrentDays.IsNull() {
+				daysVal := int(*rulePlan.NoncurrentVersionTransition.NoncurrentDays.ValueInt64Pointer())
+				ncTr.NoncurrentDays = &daysVal
+			}
+			rule.NoncurrentVersionTransition = ncTr
+		}
+
+		if rulePlan.AbortIncompleteMultipartUpload != nil {
+			abort := &rustfs.LifecycleAbortIncompleteMultipartUpload{}
+			if !rulePlan.AbortIncompleteMultipartUpload.DaysAfterInitiation.IsNull() {
+				daysVal := int(*rulePlan.AbortIncompleteMultipartUpload.DaysAfterInitiation.ValueInt64Pointer())
+				abort.DaysAfterInitiation = &daysVal
+			}
+			rule.AbortIncompleteMultipartUpload = abort
 		}
 
 		rules = append(rules, rule)

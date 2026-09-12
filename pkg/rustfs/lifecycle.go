@@ -14,10 +14,14 @@ type LifecycleConfiguration struct {
 }
 
 type LifecycleRule struct {
-	ID         string               `xml:"ID,omitempty"`
-	Status     string               `xml:"Status"`
-	Filter     LifecycleFilter      `xml:"Filter"`
-	Expiration *LifecycleExpiration `xml:"Expiration,omitempty"`
+	ID                             string                                   `xml:"ID,omitempty"`
+	Status                         string                                   `xml:"Status"`
+	Filter                         LifecycleFilter                          `xml:"Filter"`
+	Expiration                     *LifecycleExpiration                     `xml:"Expiration,omitempty"`
+	Transition                     *LifecycleTransition                     `xml:"Transition,omitempty"`
+	NoncurrentVersionExpiration    *LifecycleNoncurrentVersionExpiration    `xml:"NoncurrentVersionExpiration,omitempty"`
+	NoncurrentVersionTransition    *LifecycleNoncurrentVersionTransition    `xml:"NoncurrentVersionTransition,omitempty"`
+	AbortIncompleteMultipartUpload *LifecycleAbortIncompleteMultipartUpload `xml:"AbortIncompleteMultipartUpload,omitempty"`
 }
 
 type LifecycleFilter struct {
@@ -25,7 +29,28 @@ type LifecycleFilter struct {
 }
 
 type LifecycleExpiration struct {
-	Days *int `xml:"Days,omitempty"`
+	Days                      *int   `xml:"Days,omitempty"`
+	Date                      string `xml:"Date,omitempty"`
+	ExpiredObjectDeleteMarker *bool  `xml:"ExpiredObjectDeleteMarker,omitempty"`
+}
+
+type LifecycleTransition struct {
+	Days         *int   `xml:"Days,omitempty"`
+	Date         string `xml:"Date,omitempty"`
+	StorageClass string `xml:"StorageClass,omitempty"`
+}
+
+type LifecycleNoncurrentVersionExpiration struct {
+	NoncurrentDays *int `xml:"NoncurrentDays,omitempty"`
+}
+
+type LifecycleNoncurrentVersionTransition struct {
+	NoncurrentDays *int   `xml:"NoncurrentDays,omitempty"`
+	StorageClass   string `xml:"StorageClass,omitempty"`
+}
+
+type LifecycleAbortIncompleteMultipartUpload struct {
+	DaysAfterInitiation *int `xml:"DaysAfterInitiation,omitempty"`
 }
 
 func (c *RustfsAdmin) SetBucketLifecycleConfiguration(bucket string, config *LifecycleConfiguration) error {

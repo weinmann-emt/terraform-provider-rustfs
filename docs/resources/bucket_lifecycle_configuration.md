@@ -37,8 +37,20 @@ Required:
 
 Optional:
 
+- `abort_incomplete_multipart_upload` (Block, Optional) Configuration block for aborting incomplete multipart uploads (see [below for nested schema](#nestedblock--rule--abort_incomplete_multipart_upload))
 - `expiration` (Block, Optional) Configuration block for object expiration (see [below for nested schema](#nestedblock--rule--expiration))
 - `filter` (Block, Optional) Filter identifying one or more objects to which the rule applies (see [below for nested schema](#nestedblock--rule--filter))
+- `noncurrent_version_expiration` (Block, Optional) Configuration block for expiring noncurrent object versions (see [below for nested schema](#nestedblock--rule--noncurrent_version_expiration))
+- `noncurrent_version_transition` (Block, Optional) Configuration block for transitioning noncurrent object versions to an ILM tier (see [below for nested schema](#nestedblock--rule--noncurrent_version_transition))
+- `transition` (Block, Optional) Configuration block for transitioning objects to an ILM tier (see [below for nested schema](#nestedblock--rule--transition))
+
+<a id="nestedblock--rule--abort_incomplete_multipart_upload"></a>
+
+### Nested Schema for `rule.abort_incomplete_multipart_upload`
+
+Optional:
+
+- `days_after_initiation` (Number) Number of days after multipart upload initiation before the upload is aborted
 
 <a id="nestedblock--rule--expiration"></a>
 
@@ -46,7 +58,9 @@ Optional:
 
 Optional:
 
+- `date` (String) Date at which the objects expire (ISO8601, e.g. 2026-12-31T00:00:00Z)
 - `days` (Number) Lifetime of the objects in days
+- `expired_object_delete_marker` (Boolean) Whether to remove the delete marker of expired objects with no versions
 
 <a id="nestedblock--rule--filter"></a>
 
@@ -55,3 +69,30 @@ Optional:
 Optional:
 
 - `prefix` (String) Object key prefix identifying one or more objects to which the rule applies
+
+<a id="nestedblock--rule--noncurrent_version_expiration"></a>
+
+### Nested Schema for `rule.noncurrent_version_expiration`
+
+Optional:
+
+- `noncurrent_days` (Number) Number of days an object is noncurrent before it expires
+
+<a id="nestedblock--rule--noncurrent_version_transition"></a>
+
+### Nested Schema for `rule.noncurrent_version_transition`
+
+Optional:
+
+- `noncurrent_days` (Number) Number of days an object is noncurrent before it is transitioned
+- `storage_class` (String) Name of the RustFS ILM tier to transition noncurrent versions to
+
+<a id="nestedblock--rule--transition"></a>
+
+### Nested Schema for `rule.transition`
+
+Optional:
+
+- `date` (String) Date at which the objects are transitioned (ISO8601, e.g. 2026-12-31T00:00:00Z)
+- `days` (Number) Lifetime of the objects in days before transition
+- `storage_class` (String) Name of the RustFS ILM tier to transition objects to
