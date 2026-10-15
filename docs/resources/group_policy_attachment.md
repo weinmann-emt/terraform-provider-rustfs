@@ -8,6 +8,8 @@ description: |-
 
 Attach a canned IAM policy to an IAM group. The policy is detached when the resource is destroyed.
 
+Multiple attachments may target the same group; each one adds its policy to the group's existing policy mapping and only removes its own policy on destroy. If the policy is detached outside Terraform, the next plan re-attaches it.
+
 ## Example Usage
 
 ```terraform

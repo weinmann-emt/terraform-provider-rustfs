@@ -3,6 +3,7 @@ package provider
 import (
 	"context"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/hashicorp/terraform-plugin-framework/path"
@@ -106,9 +107,23 @@ func (r *GroupPolicyAttachmentRessource) Read(ctx context.Context, req resource.
 	if resp.Diagnostics.HasError() {
 		return
 	}
-	// The API exposes no read-back for group policy attachments; the attach
-	// operation is idempotent and the natural key is immutable, so the last
-	// known state is preserved (same pattern as rustfs_bucket).
+	policies, err := r.client.RustClient.GetGroupPolicies(state.Group.ValueString())
+	if err != nil {
+		resp.Diagnostics.AddError(
+			"Error reading group policies",
+			"Could not read policies of group: "+err.Error(),
+		)
+		return
+	}
+	// Detached outside Terraform: drop from state so the next plan re-attaches.
+	if !slices.Contains(policies, state.Policy.ValueString()) {
+		tflog.Warn(ctx, "policy no longer attached to group, removing from state", map[string]any{
+			"group":  state.Group.ValueString(),
+			"policy": state.Policy.ValueString(),
+		})
+		resp.State.RemoveResource(ctx)
+		return
+	}
 	resp.Diagnostics.Append(resp.State.Set(ctx, &state)...)
 }
 
